@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beat Box — A Pocket Drum Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161a;
+    --bg-panel:#1b1e25;
+    --bg-panel-2:#20232b;
+    --bg-well:#111318;
+    --border:#2b2f3a;
+    --border-soft:#23262f;
+    --text:#ecedf2;
+    --text-muted:#9096a3;
+    --text-dim:#5c606b;
+    --orange:#ff3c00;
+    --cyan:#74edfc;
+    --green:#4de89a;
+    --lilac:#b49cff;
+    --body:#17181b;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(1100px 500px at 20% -10%, rgba(255,255,255,0.035), transparent 60%), var(--bg);
+    color:var(--text);font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;
+    padding:28px 16px 40px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  button,select{font:inherit;color:inherit;}
+  button:focus-visible,select:focus-visible,.knob:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;}
+
+  .brand{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;}
+  .brand-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;}
+  .brand-title span{color:var(--orange);}
+  .brand-sub,.label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-dim);}
+
+  /* ---------- The device ---------- */
+  .device{
+    background:linear-gradient(180deg,#1d1e22,var(--body));
+    border:1px solid #2a2b30;border-radius:22px;padding:20px;
+    box-shadow:0 1px 0 rgba(255,255,255,0.05) inset, 0 30px 50px -30px rgba(0,0,0,0.9);
+    display:grid;grid-template-columns:52px 1fr;gap:18px;
+  }
+
+  .top{grid-column:1/-1;display:flex;gap:18px;align-items:center;flex-wrap:wrap;}
+  .oled{
+    background:#000;border:1px solid #2a2b30;border-radius:6px;padding:8px 12px;width:210px;min-height:74px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;line-height:18px;color:#f2f2f2;
+    box-shadow:0 0 0 3px #0b0b0d inset;
+  }
+  .oled div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .oled .dim{color:#8a8a8a;}
+
+  .knobs{flex:1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;min-width:280px;}
+  .kn{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .kn .led{width:4px;height:4px;border-radius:50%;background:#3a3c42;}
+  .kn.pk .led{background:var(--c,#fff);box-shadow:0 0 6px var(--c,#fff);}
+  .knob{
+    width:40px;height:40px;border-radius:50%;cursor:ns-resize;position:relative;touch-action:none;
+    background:radial-gradient(circle at 50% 35%,#3a3c42,#141518 70%);
+    box-shadow:0 2px 0 #000, 0 0 0 1px #2c2e33;
+  }
+  .knob::after{content:"";position:absolute;left:50%;top:5px;width:2px;height:11px;margin-left:-1px;border-radius:2px;background:#e8e8ea;transform-origin:50% 15px;transform:rotate(var(--a,0deg));}
+  .kn .nm{font-size:10px;color:var(--text-muted);text-align:center;line-height:1.2;}
+
+  .side{display:flex;flex-direction:column;gap:10px;align-items:center;}
+  .rb{
+    width:44px;height:44px;border-radius:50%;border:1px solid #2c2e33;cursor:pointer;
+    background:radial-gradient(circle at 50% 35%,#2a2c31,#16171a);box-shadow:0 2px 0 #000;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#cfd1d6;
+  }
+  .rb svg{width:16px;height:16px;}
+  .rb.on.play{color:var(--green);box-shadow:0 2px 0 #000,0 0 14px -2px var(--green);}
+  .rb.on.rec{color:var(--orange);box-shadow:0 2px 0 #000,0 0 14px -2px var(--orange);}
+  .rb.on.mute{color:var(--cyan);box-shadow:0 2px 0 #000,0 0 14px -2px var(--cyan);}
+  .side .sp{flex:1;}
+
+  .pads-area{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .area-label{margin-bottom:8px;display:flex;justify-content:space-between;}
+
+  .pad{
+    --c:#fff;
+    aspect-ratio:1;border-radius:7px;border:0;cursor:pointer;position:relative;padding:6px;
+    background:color-mix(in srgb,var(--c) 14%,#2a2c31);
+    box-shadow:0 2px 0 #08080a, 0 1px 0 rgba(255,255,255,0.06) inset;
+    display:flex;align-items:flex-end;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;color:color-mix(in srgb,var(--c) 55%,#9096a3);
+    touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:background .1s, box-shadow .1s;
+  }
+  .pad .k{opacity:.7;}
+  .pad.sel{box-shadow:0 2px 0 #08080a, 0 0 0 2px color-mix(in srgb,var(--c) 70%,#fff) inset;}
+  .pad.muted{opacity:.35;}
+  .pad.hit{background:var(--c);color:#0b0c0f;box-shadow:0 0 0 #08080a,0 0 24px -2px var(--c);transform:translateY(2px);}
+
+  .stp{
+    aspect-ratio:1;border-radius:7px;border:0;cursor:pointer;background:#25272c;
+    box-shadow:0 2px 0 #08080a, 0 1px 0 rgba(255,255,255,0.05) inset;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#5c606b;
+    display:flex;align-items:flex-end;justify-content:flex-start;padding:6px;touch-action:manipulation;
+  }
+  .stp.beat{background:#2c2e34;}
+  .stp.on{background:var(--c);color:#0b0c0f;}
+  .stp.now{box-shadow:0 2px 0 #08080a, 0 0 0 2px #fff inset;}
+
+  .stepbar{grid-column:1/-1;display:grid;grid-template-columns:repeat(16,1fr);gap:6px;}
+  .sb{height:26px;border-radius:13px;border:1px solid #2c2e33;background:#151619;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+  .sb i{width:6px;height:6px;border-radius:50%;background:#3a3c42;}
+  .sb.on i{background:var(--c);box-shadow:0 0 6px var(--c);}
+  .sb.now i{background:#fff;box-shadow:0 0 8px #fff;}
+
+  @media (max-width:700px){
+    .device{grid-template-columns:1fr;padding:14px;}
+    .side{flex-direction:row;justify-content:center;flex-wrap:wrap;}
+    .side .sp{display:none;}
+    .pads-area{grid-template-columns:1fr;}
+    .oled{width:100%;}
+    .knobs{grid-template-columns:repeat(4,minmax(0,1fr));min-width:0;}
+    .stepbar{grid-template-columns:repeat(8,1fr);}
+  }
+
+  /* ---------- Panels below ---------- */
+  .panel{
+    margin-top:14px;padding:18px;border-radius:var(--radius);border:1px solid var(--border);
+    background:linear-gradient(180deg,var(--bg-panel),var(--bg-panel-2));
+  }
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+  .btn{
+    cursor:pointer;background:var(--bg-well);border:1px solid var(--border);border-radius:999px;
+    padding:6px 12px;font-size:12px;font-weight:500;color:var(--text-muted);
+  }
+  .btn:hover{color:var(--text);border-color:var(--text-dim);}
+  .btn.on{background:var(--cyan);border-color:var(--cyan);color:#0b0c0f;}
+  select.btn{padding-right:28px;max-width:100%;}
+  .status{font-size:12px;color:var(--text-muted);}
+  .help{margin:10px 0 0;font-size:12px;color:var(--text-dim);line-height:1.6;}
+  .help kbd{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:0 4px;}
+
+  .ov{display:grid;grid-template-columns:92px repeat(16,1fr);gap:3px;margin-top:12px;font-size:11px;}
+  .ov .nm{color:var(--text-muted);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px;line-height:18px;}
+  .ov .nm.sel{color:var(--text);font-weight:600;}
+  .ov .cell{height:18px;border-radius:3px;background:#24262b;cursor:pointer;border:0;padding:0;}
+  .ov .cell.beat{background:#2b2d33;}
+  .ov .cell.on{background:var(--c);}
+  .ov .cell.now{outline:1px solid rgba(255,255,255,.7);outline-offset:-1px;}
+
+  .keys-hint{margin-top:12px;padding:8px 12px;border-radius:999px;font-size:12px;text-align:center;border:1px dashed var(--border);color:var(--text-muted);}
+  body.focused .keys-hint{border-style:solid;border-color:color-mix(in srgb,var(--green) 50%,var(--border));color:var(--green);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="brand-title">Beat <span>Box</span></div>
+    <div class="brand-sub">16 pads · 16 steps · MIDI ready</div>
+  </header>
+
+  <div class="device">
+    <div class="top">
+      <div class="oled" aria-live="polite"><div id="o1">Kick</div><div id="o2" class="dim">■ 110 BPM</div><div id="o3" class="dim">Tap a pad</div></div>
+      <div class="knobs" id="knobs"></div>
+    </div>
+
+    <div class="side">
+      <button class="rb play" id="play" title="Play / stop (Space)" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></button>
+      <button class="rb rec" id="rec" title="Record pad hits into the pattern (Enter)" aria-label="Record"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+      <span class="sp"></span>
+      <button class="rb mute" id="mute" title="Mute the selected pad" aria-label="Mute selected pad">M</button>
+      <button class="rb" id="clear" title="Clear the selected pad's steps (hold Shift to clear everything)" aria-label="Clear steps"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    </div>
+
+    <div class="pads-area">
+      <div>
+        <div class="area-label"><span class="label">Drums</span><span class="label" id="selName"></span></div>
+        <div class="grid4" id="drums"></div>
+      </div>
+      <div>
+        <div class="area-label"><span class="label">Steps · selected pad</span><span class="label" id="stepPos"></span></div>
+        <div class="grid4" id="steps"></div>
+      </div>
+    </div>
+
+    <div class="stepbar" id="stepbar"></div>
+  </div>
+
+  <div class="keys-hint" id="keysHint">Click anywhere in the drum machine to play it from your keyboard</div>
+
+  <section class="panel">
+    <div class="label">MIDI controller</div>
+    <div class="row">
+      <button class="btn" id="midiConnect">Connect MIDI</button>
+      <select class="btn" id="midiIn" hidden aria-label="MIDI input"></select>
+      <button class="btn" id="learn" hidden title="Hit the next pad on your controller to assign it to the selected pad">Learn pad</button>
+      <span class="status" id="midiStatus">Not connected</span>
+    </div>
+    <p class="help">Pads sending notes 36–51 play the 16 pads in order, from the bottom left. Knobs sending CC 70–77 turn the 8 knobs. MIDI Start and Stop run the transport. Use <b>Learn pad</b> to map any note to the selected pad. Works in Chrome and Edge; Safari doesn't support MIDI in the browser.</p>
+  </section>
+
+  <section class="panel">
+    <div class="label">Pattern overview</div>
+    <div class="ov" id="ov"></div>
+    <p class="help">
+      <kbd>1</kbd>–<kbd>4</kbd> <kbd>Q</kbd>–<kbd>R</kbd> <kbd>A</kbd>–<kbd>F</kbd> <kbd>Z</kbd>–<kbd>V</kbd> play the pads, laid out like the grid ·
+      <kbd>Space</kbd> play/stop · <kbd>Enter</kbd> record · Drag a knob up or down, scroll it, or double-click to reset ·
+      Your pattern is remembered in this browser.
+    </p>
+  </section>
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const FAM = ["#ff3c00","#74edfc","#4de89a","#b49cff"];
+
+  /* ---------- Sounds (all synthesised, no samples) ---------- */
+  let ctx = null, master = null, noiseBuf = null, openHat = null;
+
+  function audio(){
+    if (!ctx){
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain(); master.gain.value = state.g.master / 100;
+      const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -8; comp.ratio.value = 4;
+      master.connect(comp); comp.connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+  function noise(c){
+    if (!noiseBuf){
+      noiseBuf = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const s = c.createBufferSource(); s.buffer = noiseBuf; s.loop = true; return s;
+  }
+  function osc(c, type, f0, f1, t, glide){
+    const o = c.createOscillator(); o.type = type;
+    o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(f1, t + glide);
+    return o;
+  }
+  function filt(c, type, f, q){ const b = c.createBiquadFilter(); b.type = type; b.frequency.value = Math.min(f, 20000); b.Q.value = q || 0.8; return b; }
+  function env(c, t, peak, dur, attack){
+    const g = c.createGain(), a = attack || 0.001;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + a + dur); return g;
+  }
+  // connect src → nodes… → out, and run it for dur seconds
+  function go(src, nodes, out, t, dur){
+    let n = src; nodes.forEach(x => { n.connect(x); n = x; }); n.connect(out);
+    src.start(t); src.stop(t + dur + 0.05);
+  }
+
+  const KIT = [
+    { name:"Kick", fam:0, fn:(c,t,o,p,d) => go(osc(c,"sine",160*p,48*p,t,0.11), [env(c,t,1,0.5*d)], o, t, 0.5*d) },
+    { name:"Snare", fam:1, fn:(c,t,o,p,d) => {
+      go(noise(c), [filt(c,"highpass",1200*p), env(c,t,0.7,0.22*d)], o, t, 0.22*d);
+      go(osc(c,"triangle",190*p,140*p,t,0.08), [env(c,t,0.6,0.12*d)], o, t, 0.12*d); } },
+    { name:"Closed Hat", fam:2, fn:(c,t,o,p,d) => {
+      if (openHat){ openHat.gain.cancelScheduledValues(t); openHat.gain.setTargetAtTime(0.0001, t, 0.01); openHat = null; }
+      go(noise(c), [filt(c,"highpass",7500*p), env(c,t,0.4,0.06*d)], o, t, 0.06*d); } },
+    { name:"Open Hat", fam:2, fn:(c,t,o,p,d) => { const g = env(c,t,0.35,0.45*d); openHat = g; go(noise(c), [filt(c,"highpass",7000*p), g], o, t, 0.45*d); } },
+    { name:"Clap", fam:1, fn:(c,t,o,p,d) => {
+      const g = c.createGain(); g.gain.setValueAtTime(0.0001, t);
+      [0, 0.011, 0.022].forEach(s => { g.gain.setValueAtTime(0.8, t + s); g.gain.exponentialRampToValueAtTime(0.1, t + s + 0.009); });
+      g.gain.setValueAtTime(0.6, t + 0.032); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.032 + 0.22*d);
+      go(noise(c), [filt(c,"bandpass",1200*p,1.4), g], o, t, 0.26*d); } },
+    { name:"Rim", fam:1, fn:(c,t,o,p,d) => {
+      go(osc(c,"triangle",1800*p,0,t), [env(c,t,0.5,0.04*d)], o, t, 0.04*d);
+      go(noise(c), [filt(c,"bandpass",3000*p,2), env(c,t,0.3,0.02*d)], o, t, 0.02*d); } },
+    { name:"Low Tom", fam:3, fn:(c,t,o,p,d) => go(osc(c,"sine",120*p,80*p,t,0.3), [env(c,t,0.9,0.45*d)], o, t, 0.45*d) },
+    { name:"High Tom", fam:3, fn:(c,t,o,p,d) => go(osc(c,"sine",200*p,140*p,t,0.25), [env(c,t,0.8,0.35*d)], o, t, 0.35*d) },
+    { name:"808", fam:0, fn:(c,t,o,p,d) => go(osc(c,"sine",64*p,48*p,t,0.08), [env(c,t,1,1.4*d,0.003)], o, t, 1.4*d) },
+    { name:"Cowbell", fam:3, fn:(c,t,o,p,d) => {
+      const bp = filt(c,"bandpass",800*p,3), g = env(c,t,0.5,0.35*d);
+      bp.connect(g); g.connect(o);
+      [545, 815].forEach(f => { const s = osc(c,"square",f*p,0,t); s.connect(bp); s.start(t); s.stop(t + 0.4*d); }); } },
+    { name:"Shaker", fam:2, fn:(c,t,o,p,d) => go(noise(c), [filt(c,"bandpass",7000*p,1.2), env(c,t,0.5,0.09*d,0.015)], o, t, 0.11*d) },
+    { name:"Crash", fam:2, fn:(c,t,o,p,d) => go(noise(c), [filt(c,"highpass",4500*p), env(c,t,0.45,1.6*d)], o, t, 1.6*d) },
+    { name:"Clave", fam:3, fn:(c,t,o,p,d) => go(osc(c,"sine",2500*p,0,t), [env(c,t,0.7,0.06*d)], o, t, 0.06*d) },
+    { name:"Conga", fam:3, fn:(c,t,o,p,d) => go(osc(c,"sine",330*p,250*p,t,0.05), [env(c,t,0.8,0.28*d)], o, t, 0.28*d) },
+    { name:"Snap", fam:1, fn:(c,t,o,p,d) => {
+      go(noise(c), [filt(c,"bandpass",2600*p,2), env(c,t,0.8,0.07*d)], o, t, 0.07*d);
+      go(osc(c,"sine",1200*p,600*p,t,0.03), [env(c,t,0.3,0.03*d)], o, t, 0.03*d); } },
+    { name:"Zap", fam:0, fn:(c,t,o,p,d) => go(osc(c,"sine",1800*p,70*p,t,0.14), [env(c,t,0.7,0.2*d)], o, t, 0.2*d) }
+  ];
+  const N = KIT.length, STEPS = 16;
+  const colour = i => FAM[KIT[i].fam];
+
+  /* ---------- State ---------- */
+  const KNOBS = [
+    { k:"tempo",  name:"Tempo",  min:60,  max:180, def:110, g:true, fmt:v => v + " BPM" },
+    { k:"swing",  name:"Swing",  min:0,   max:60,  def:0,   g:true, fmt:v => v + "%" },
+    { k:"master", name:"Volume", min:0,   max:100, def:80,  g:true, fmt:v => v + "%" },
+    { k:"pitch",  name:"Pitch",  min:-12, max:12,  def:0,   fmt:v => (v > 0 ? "+" : "") + v + " st" },
+    { k:"decay",  name:"Decay",  min:10,  max:300, def:100, fmt:v => v + "%" },
+    { k:"tone",   name:"Tone",   min:0,   max:100, def:100, fmt:v => v + "%" },
+    { k:"pan",    name:"Pan",    min:-50, max:50,  def:0,   fmt:v => v === 0 ? "C" : (v < 0 ? "L" + -v : "R" + v) },
+    { k:"level",  name:"Level",  min:0,   max:100, def:80,  fmt:v => v + "%" }
+  ];
+  const freshPad = () => Object.fromEntries(KNOBS.filter(k => !k.g).map(k => [k.k, k.def]).concat([["mute", false]]));
+  function starter(){
+    const p = KIT.map(() => Array(STEPS).fill(0));
+    [0, 6, 8].forEach(s => p[0][s] = 1);
+    [4, 12].forEach(s => p[1][s] = 1);
+    for (let s = 0; s < STEPS; s += 2) if (s !== 14) p[2][s] = 0.7;
+    p[3][14] = 0.7;
+    return p;
+  }
+  let state = { g:{ tempo:110, swing:0, master:80 }, pads:KIT.map(freshPad), pat:starter(), learn:{} };
+  const SAVE = "hg-beat-box-v1";
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE));
+    if (s && s.pat && s.pat.length === N) state = Object.assign(state, s);
+  } catch(e) {}
+  const save = () => { try { localStorage.setItem(SAVE, JSON.stringify(state)); } catch(e) {} };
+
+  let sel = 0, playing = false, recording = false, cur = -1;
+
+  /* ---------- Playing a pad ---------- */
+  function sound(i, t, vel){
+    const c = audio(), p = state.pads[i];
+    const lvl = c.createGain(); lvl.gain.value = (p.level / 100) * (vel == null ? 1 : vel);
+    const tone = filt(c, "lowpass", 180 * Math.pow(2, p.tone / 100 * 6.8), 0.7);
+    lvl.connect(tone);
+    let last = tone;
+    if (c.createStereoPanner){ const pan = c.createStereoPanner(); pan.pan.value = p.pan / 50; tone.connect(pan); last = pan; }
+    last.connect(master);
+    KIT[i].fn(c, t, lvl, Math.pow(2, p.pitch / 12), p.decay / 100);
+  }
+
+  function hit(i, vel){
+    const c = audio();
+    sound(i, c.currentTime, vel);
+    flash(i);
+    if (recording && playing){
+      const s = nearestStep();
+      if (s >= 0){ state.pat[i][s] = vel == null ? 1 : Math.max(0.2, vel); save(); }
+    }
+    if (sel !== i){ sel = i; renderAll(); }
+    oled(3, KIT[i].name + (recording && playing ? "  ● rec" : ""));
+  }
+
+  /* ---------- Sequencer (look-ahead scheduler) ---------- */
+  let step = 0, nextTime = 0, timer = null;
+  const queue = []; let lastPlayed = null;
+  const stepDur = () => 60 / state.g.tempo / 4;
+
+  function schedule(){
+    const c = ctx;
+    while (nextTime < c.currentTime + 0.12){
+      const t = nextTime + (step % 2 ? stepDur() * state.g.swing / 100 * 0.5 : 0);
+      for (let i = 0; i < N; i++){
+        const v = state.pat[i][step];
+        if (v && !state.pads[i].mute) sound(i, t, v);
+      }
+      queue.push({ step, time:t });
+      nextTime += stepDur();
+      step = (step + 1) % STEPS;
+    }
+  }
+  function nearestStep(){
+    const now = ctx.currentTime, nxt = queue[0];
+    if (!lastPlayed) return nxt ? nxt.step : 0;
+    if (nxt && nxt.time - now < now - lastPlayed.time) return nxt.step;
+    return lastPlayed.step;
+  }
+  function start(){
+    if (playing) return;
+    const c = audio(); playing = true; step = 0; nextTime = c.currentTime + 0.06; queue.length = 0; lastPlayed = null;
+    schedule(); timer = setInterval(schedule, 25);
+    $("play").classList.add("on"); oledStatus();
+  }
+  function stop(){
+    if (!playing) return;
+    playing = false; clearInterval(timer); queue.length = 0; cur = -1; lastPlayed = null;
+    $("play").classList.remove("on"); renderSteps(); oledStatus();
+  }
+
+  (function loop(){
+    if (playing && ctx){
+      let changed = false;
+      while (queue.length && queue[0].time <= ctx.currentTime){ lastPlayed = queue.shift(); cur = lastPlayed.step; changed = true; }
+      if (changed){ renderSteps(); oledStatus(); }
+    }
+    requestAnimationFrame(loop);
+  })();
+
+  /* ---------- Display ---------- */
+  let msgTimer = null;
+  function oled(line, text, sticky){
+    $("o" + line).textContent = text;
+    if (line === 3 && !sticky){ clearTimeout(msgTimer); msgTimer = setTimeout(() => $("o3").textContent = midiLine(), 1600); }
+  }
+  function oledStatus(){
+    const pos = playing && cur >= 0 ? "  " + String(cur + 1).padStart(2, "0") + "/16" : "";
+    $("o2").textContent = (playing ? "▶ " : "■ ") + state.g.tempo + " BPM" + pos;
+    $("stepPos").textContent = playing && cur >= 0 ? "Step " + (cur + 1) : "";
+  }
+
+  /* ---------- Pads + steps UI ---------- */
+  const KEYS = ["z","x","c","v","a","s","d","f","q","w","e","r","1","2","3","4"];   // bottom row first, like the pads
+  const drumEls = [], stepEls = [], barEls = [], ovCells = [], ovNames = [];
+
+  for (let r = 3; r >= 0; r--) for (let c = 0; c < 4; c++){
+    const i = r * 4 + c, b = document.createElement("button");
+    b.className = "pad"; b.style.setProperty("--c", colour(i));
+    b.innerHTML = `<span>${KIT[i].name}</span><span class="k">${KEYS[i].toUpperCase()}</span>`;
+    b.setAttribute("aria-label", KIT[i].name + " pad");
+    b.addEventListener("pointerdown", e => { e.preventDefault(); hit(i); });
+    $("drums").appendChild(b); drumEls[i] = b;
+  }
+  for (let s = 0; s < STEPS; s++){
+    const b = document.createElement("button");
+    b.className = "stp" + (s % 4 === 0 ? " beat" : ""); b.innerHTML = `<span>${s + 1}</span>`;
+    b.setAttribute("aria-label", "Step " + (s + 1));
+    b.addEventListener("click", () => toggle(sel, s));
+    $("steps").appendChild(b); stepEls[s] = b;
+
+    const sb = document.createElement("button");
+    sb.className = "sb"; sb.innerHTML = "<i></i>"; sb.setAttribute("aria-label", "Step " + (s + 1));
+    sb.addEventListener("click", () => toggle(sel, s));
+    $("stepbar").appendChild(sb); barEls[s] = sb;
+  }
+  for (let i = 0; i < N; i++){
+    const nm = document.createElement("div");
+    nm.className = "nm"; nm.textContent = KIT[i].name; nm.style.setProperty("--c", colour(i));
+    nm.addEventListener("click", () => { sel = i; renderAll(); oled(1, KIT[i].name); });
+    $("ov").appendChild(nm); ovNames[i] = nm; ovCells[i] = [];
+    for (let s = 0; s < STEPS; s++){
+      const c = document.createElement("button");
+      c.className = "cell" + (s % 4 === 0 ? " beat" : ""); c.style.setProperty("--c", colour(i));
+      c.setAttribute("aria-label", KIT[i].name + " step " + (s + 1));
+      c.addEventListener("click", () => toggle(i, s));
+      $("ov").appendChild(c); ovCells[i][s] = c;
+    }
+  }
+
+  function toggle(i, s){
+    state.pat[i][s] = state.pat[i][s] ? 0 : 1; save();
+    if (!playing && state.pat[i][s]) sound(i, audio().currentTime);
+    renderSteps();
+  }
+
+  const flashTimers = [];
+  function flash(i){
+    drumEls[i].classList.add("hit"); clearTimeout(flashTimers[i]);
+    flashTimers[i] = setTimeout(() => drumEls[i].classList.remove("hit"), 110);
+  }
+
+  function renderSteps(){
+    const c = colour(sel);
+    for (let s = 0; s < STEPS; s++){
+      const on = !!state.pat[sel][s];
+      stepEls[s].style.setProperty("--c", c); barEls[s].style.setProperty("--c", c);
+      stepEls[s].classList.toggle("on", on); stepEls[s].classList.toggle("now", s === cur);
+      barEls[s].classList.toggle("on", on); barEls[s].classList.toggle("now", s === cur);
+      for (let i = 0; i < N; i++){ ovCells[i][s].classList.toggle("on", !!state.pat[i][s]); ovCells[i][s].classList.toggle("now", s === cur); }
+    }
+  }
+  function renderAll(){
+    drumEls.forEach((b, i) => { b.classList.toggle("sel", i === sel); b.classList.toggle("muted", state.pads[i].mute); });
+    ovNames.forEach((n, i) => n.classList.toggle("sel", i === sel));
+    $("selName").textContent = KIT[sel].name;
+    $("mute").classList.toggle("on", state.pads[sel].mute);
+    $("o1").textContent = KIT[sel].name + (state.pads[sel].mute ? " (muted)" : "");
+    knobEls.forEach(drawKnob);
+    renderSteps(); oledStatus();
+  }
+
+  /* ---------- Knobs ---------- */
+  const knobEls = [];
+  const kget = d => d.g ? state.g[d.k] : state.pads[sel][d.k];
+  function kset(d, v){
+    v = Math.round(Math.min(d.max, Math.max(d.min, v)));
+    if (d.g) state.g[d.k] = v; else state.pads[sel][d.k] = v;
+    if (d.k === "master" && master) master.gain.value = v / 100;
+    if (d.k === "tempo") oledStatus();
+    drawKnob(knobEls[KNOBS.indexOf(d)]);
+    oled(3, (d.g ? "" : KIT[sel].name + " ") + d.name + ": " + d.fmt(v));
+    save();
+  }
+  function drawKnob(el){
+    const d = el.def, v = kget(d), a = -135 + (v - d.min) / (d.max - d.min) * 270;
+    el.knob.style.setProperty("--a", a + "deg");
+    el.knob.setAttribute("aria-valuenow", v); el.knob.setAttribute("aria-valuetext", d.fmt(v));
+    el.wrap.style.setProperty("--c", colour(sel));
+  }
+  KNOBS.forEach(d => {
+    const wrap = document.createElement("div"), knob = document.createElement("div");
+    wrap.className = "kn" + (d.g ? "" : " pk");
+    knob.className = "knob"; knob.tabIndex = 0;
+    knob.setAttribute("role", "slider"); knob.setAttribute("aria-label", d.name);
+    knob.setAttribute("aria-valuemin", d.min); knob.setAttribute("aria-valuemax", d.max);
+    wrap.innerHTML = `<span class="led"></span>`; wrap.appendChild(knob);
+    wrap.insertAdjacentHTML("beforeend", `<span class="nm">${d.name}</span>`);
+    $("knobs").appendChild(wrap);
+    const el = { def:d, knob, wrap }; knobEls.push(el);
+
+    const range = d.max - d.min;
+    let drag = null;
+    knob.addEventListener("pointerdown", e => { knob.setPointerCapture(e.pointerId); drag = { y:e.clientY, v:kget(d) }; });
+    knob.addEventListener("pointermove", e => { if (drag) kset(d, drag.v + (drag.y - e.clientY) / 150 * range); });
+    knob.addEventListener("pointerup", () => drag = null);
+    knob.addEventListener("pointercancel", () => drag = null);
+    knob.addEventListener("wheel", e => { e.preventDefault(); kset(d, kget(d) + (e.deltaY < 0 ? 1 : -1) * Math.max(1, range / 60)); }, { passive:false });
+    knob.addEventListener("dblclick", () => kset(d, d.def));
+    knob.addEventListener("keydown", e => {
+      const k = { ArrowUp:1, ArrowRight:1, ArrowDown:-1, ArrowLeft:-1 }[e.key];
+      if (k){ e.preventDefault(); e.stopPropagation(); kset(d, kget(d) + k * Math.max(1, range / 60)); }
+    });
+  });
+
+  /* ---------- Transport buttons ---------- */
+  $("play").addEventListener("click", () => playing ? stop() : start());
+  $("rec").addEventListener("click", toggleRec);
+  function toggleRec(){
+    recording = !recording; $("rec").classList.toggle("on", recording);
+    if (recording && !playing) start();
+    oled(3, recording ? "Recording: hit pads" : "Record off");
+  }
+  $("mute").addEventListener("click", () => { state.pads[sel].mute = !state.pads[sel].mute; save(); renderAll(); });
+  $("clear").addEventListener("click", e => {
+    if (e.shiftKey){ state.pat = KIT.map(() => Array(STEPS).fill(0)); oled(3, "Cleared all"); }
+    else { state.pat[sel] = Array(STEPS).fill(0); oled(3, "Cleared " + KIT[sel].name); }
+    save(); renderSteps();
+  });
+
+  /* ---------- Computer keyboard ---------- */
+  document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    if (e.target.tagName === "SELECT") return;
+    if (e.code === "Space"){ e.preventDefault(); playing ? stop() : start(); return; }
+    if (e.key === "Enter" && e.target.tagName !== "BUTTON"){ e.preventDefault(); toggleRec(); return; }
+    const i = KEYS.indexOf(e.key.toLowerCase());
+    if (i >= 0){ e.preventDefault(); hit(i); }
+  });
+  const setFocus = () => {
+    const f = document.hasFocus(); document.body.classList.toggle("focused", f);
+    $("keysHint").textContent = f ? "Keyboard is live: pads on 1–4 / Q–R / A–F / Z–V, Space to play" : "Click anywhere in the drum machine to play it from your keyboard";
+  };
+  window.addEventListener("focus", setFocus); window.addEventListener("blur", setFocus);
+  document.addEventListener("pointerdown", () => { window.focus(); setTimeout(setFocus); });
+  setFocus();
+
+  /* ---------- MIDI ---------- */
+  let midi = null, learning = false, lastDevice = "";
+  const midiLine = () => midi ? (lastDevice ? "MIDI: " + lastDevice : "MIDI ready") : "Tap a pad";
+
+  $("midiConnect").addEventListener("click", async () => {
+    if (!navigator.requestMIDIAccess){ $("midiStatus").textContent = "This browser can't use MIDI. Try Chrome or Edge."; return; }
+    try {
+      midi = await navigator.requestMIDIAccess();
+    } catch(e){
+      $("midiStatus").textContent = "MIDI access was blocked. Allow it in the browser's site settings."; return;
+    }
+    $("midiConnect").hidden = true; $("midiIn").hidden = false; $("learn").hidden = false;
+    midi.onstatechange = listInputs; listInputs();
+  });
+
+  function listInputs(){
+    const sel = $("midiIn"), keep = sel.value, ins = [...midi.inputs.values()];
+    sel.innerHTML = `<option value="all">All inputs (${ins.length})</option>` + ins.map(i => `<option value="${i.id}">${i.name}</option>`).join("");
+    if ([...sel.options].some(o => o.value === keep)) sel.value = keep;
+    ins.forEach(i => i.onmidimessage = onMidi);
+    $("midiStatus").textContent = ins.length ? ins.length + " device" + (ins.length > 1 ? "s" : "") + " found" : "No devices. Plug one in, it will appear here.";
+    oled(3, midiLine(), true);
+  }
+  $("learn").addEventListener("click", () => {
+    learning = !learning; $("learn").classList.toggle("on", learning);
+    $("midiStatus").textContent = learning ? "Hit a pad on your controller to assign it to " + KIT[sel].name : "Learn off";
+  });
+
+  function onMidi(e){
+    const choice = $("midiIn").value;
+    if (choice !== "all" && e.target.id !== choice) return;
+    const [st, a, b] = e.data, type = st & 0xf0;
+    if (st === 0xfa || st === 0xfb){ start(); return; }
+    if (st === 0xfc){ stop(); return; }
+    if (lastDevice !== e.target.name){ lastDevice = e.target.name; }
+    if (type === 0x90 && b > 0){
+      if (learning){
+        Object.keys(state.learn).forEach(n => { if (state.learn[n] === sel) delete state.learn[n]; });
+        state.learn[a] = sel; save(); learning = false; $("learn").classList.remove("on");
+        $("midiStatus").textContent = "Note " + a + " now plays " + KIT[sel].name; return;
+      }
+      const i = a in state.learn ? state.learn[a] : (a >= 36 && a < 36 + N ? a - 36 : a % N);
+      hit(i, b / 127);
+    } else if (type === 0xb0 && a >= 70 && a <= 77){
+      const d = KNOBS[a - 70]; kset(d, d.min + b / 127 * (d.max - d.min));
+    }
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>

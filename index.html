@@ -314,7 +314,7 @@ const POSTS = [
       "Today, I did a complete 180 on my final project. After about 20 hours dedicated towards my LMS Mode of the Day, I’ve decided to do something harder. I’m going to make my own drum machine.",
       "“But why?” a reasonable person might ask. The reason is my larger theory: complex user interfaces are developed without consideration of skill acquisition, increasing barriers for music makers. With the development of LLM reasoning and coding capabilities, this paradigm has the opportunity to shift. I want to reprogram a drum pad similar to the one used in today’s class, in a way that gives me the most capability and usability. That being said, today’s Ableton portable drum machine was quite simple to use, but it could be more efficient!"
     ],
-    media:[ { type:"soon", label:"Drum machine", hint:"Interactive website coming soon" } ] },
+    media:[ { type:"web", label:"Beat Box", hint:"A pocket drum machine with MIDI controller support", local:"tools/drum-machine.html" } ] },
   { id:"week-11", week:11, subject:"Technology in Music Education", title:"Mashups, Chopping and More", status:"published", colour:"cyan", image:"",
     tags:["Sampling","Mashup","Ableton"],
     body:[
@@ -636,7 +636,7 @@ function mediaBlock(m, colour){
     return `<div class="block"><div class="head"><h3 class="title">${esc(m.label)}</h3>${EMBED_MODE==="embed"?`<a class="small-link" href="${watch}" target="_blank" rel="noopener">Open on YouTube</a>`:`<small>Video</small>`}</div>${inner}</div>`;
   }
   if (m.local){
-    return `<div class="block tool"><div class="head"><h3 class="title">${esc(m.label)}</h3><small>${m.hint?esc(m.hint)+" · ":""}<a class="small-link" href="${esc(m.local)}" target="_blank" rel="noopener">Full screen</a></small></div><iframe class="frame toolframe" src="${esc(m.local)}" title="${esc(m.label)}" loading="lazy" onload="fitFrame(this)"></iframe></div>`;
+    return `<div class="block tool"><div class="head"><h3 class="title">${esc(m.label)}</h3><small>${m.hint?esc(m.hint)+" · ":""}<a class="small-link" href="${esc(m.local)}" target="_blank" rel="noopener">Full screen</a></small></div><iframe class="frame toolframe" src="${esc(m.local)}" title="${esc(m.label)}" loading="lazy" allow="midi; autoplay" onload="fitFrame(this)"></iframe></div>`;
   }
   const inner = EMBED_MODE === "embed"
     ? `<iframe class="frame tall" src="${esc(m.embed||m.url)}" title="${esc(m.label)}" loading="lazy" allow="autoplay; microphone; fullscreen" allowfullscreen></iframe>`
