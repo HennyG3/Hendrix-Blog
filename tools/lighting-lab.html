@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lighting Lab — Color Temperature &amp; Three-Point Lighting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --stage:#131419;
+    --panel:#1c1e26;
+    --panel-2:#23262f;
+    --panel-3:#292c36;
+    --line:#33363f;
+    --line-soft:#2a2d36;
+    --paper:#ece9e2;
+    --paper-dim:#9c9a95;
+    --paper-dimmer:#6f6e6b;
+    --brass:#c9a467;
+    --brass-dim:#8d7550;
+    --ember:#ff7a3d;
+    --ember-deep:#ff4e1f;
+    --arctic:#6fa8ff;
+    --arctic-deep:#3d7dff;
+    --ok:#8fbf7a;
+    --radius-s:6px;
+    --radius-m:10px;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--stage);
+    color:var(--paper);
+    font-family:var(--font-body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+  }
+
+  a{ color:inherit; }
+  h1,h2,h3{ font-family:var(--font-display); margin:0; letter-spacing:-0.01em; }
+  p{ margin:0 0 1em; color:var(--paper); }
+  .mono{ font-family:var(--font-mono); }
+
+  ::selection{ background:var(--brass); color:#14151a; }
+
+  :focus-visible{
+    outline:2px solid var(--brass);
+    outline-offset:2px;
+    border-radius:4px;
+  }
+
+  .kelvin-rule{
+    height:4px;
+    border-radius:2px;
+    background:linear-gradient(90deg, var(--ember-deep) 0%, var(--ember) 16%, #fff3e6 38%, #f4f7ff 50%, #dfe9ff 58%, var(--arctic) 80%, var(--arctic-deep) 100%);
+  }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(19,20,25,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line-soft);
+  }
+  .topbar-inner{
+    max-width:1180px; margin:0 auto; padding:14px 28px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .wordmark{
+    font-family:var(--font-display); font-weight:700; font-size:15px;
+    letter-spacing:0.14em; text-transform:uppercase; text-decoration:none;
+    display:flex; align-items:center; gap:10px;
+  }
+  .wordmark .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:linear-gradient(90deg, var(--ember), var(--arctic));
+    box-shadow:0 0 10px rgba(255,122,61,0.6);
+  }
+  .topnav{ display:flex; gap:26px; }
+  .topnav a{
+    font-size:13px; text-decoration:none; color:var(--paper-dim);
+    font-weight:500; letter-spacing:0.02em;
+    transition:color 0.15s ease;
+  }
+  .topnav a:hover{ color:var(--paper); }
+  @media (max-width:720px){ .topnav{ display:none; } }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding:88px 0 64px; }
+  .hero .eyebrow{ margin-bottom:18px; }
+  .hero h1{
+    font-size:clamp(34px, 5.4vw, 58px);
+    font-weight:700; max-width:16ch;
+    line-height:1.04;
+  }
+  .hero .lede{
+    max-width:52ch; font-size:17px; color:var(--paper-dim);
+    margin-top:20px;
+  }
+  .hero .kelvin-rule{ max-width:420px; margin:34px 0 0; }
+  .hero-foot{
+    margin-top:14px; display:flex; gap:18px; flex-wrap:wrap;
+    font-family:var(--font-mono); font-size:12px; color:var(--paper-dimmer);
+  }
+  .hero-foot span b{ color:var(--paper-dim); font-weight:500; }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--brass);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:''; width:20px; height:1px; background:var(--brass-dim);
+  }
+
+  /* ---------- Lesson sections ---------- */
+  .lesson, .studio-section, .reference{ scroll-margin-top:84px; }
+  .lesson{ padding:76px 0; border-top:1px solid var(--line-soft); }
+  .lesson h2{ font-size:clamp(26px,3.4vw,36px); margin:16px 0 22px; max-width:20ch; }
+  .lesson-grid{
+    display:grid; grid-template-columns: minmax(0,1.05fr) minmax(0,0.95fr);
+    gap:56px; align-items:start;
+  }
+  @media (max-width:880px){ .lesson-grid{ grid-template-columns:1fr; } }
+  .lesson-copy p{ font-size:15.5px; color:#d7d5cf; max-width:54ch; }
+  .lesson-copy strong{ color:var(--paper); }
+  .callout{
+    margin-top:22px; padding:14px 16px; border-left:2px solid var(--brass);
+    background:var(--panel); border-radius:0 var(--radius-s) var(--radius-s) 0;
+    font-size:14px; color:var(--paper-dim);
+  }
+  .callout b{ color:var(--brass); font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; display:block; margin-bottom:6px; }
+
+  .studio-link{
+    display:inline-flex; align-items:center; gap:8px; margin-top:26px;
+    font-family:var(--font-mono); font-size:12.5px; color:var(--paper);
+    text-decoration:none; padding:10px 16px; border:1px solid var(--line);
+    border-radius:99px; transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .studio-link:hover{ border-color:var(--brass-dim); background:var(--panel); }
+  .studio-link svg{ width:12px; height:12px; }
+
+  /* ---------- Kelvin ruler diagram ---------- */
+  .ruler-card{
+    background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius-m);
+    padding:26px 22px 20px;
+  }
+  .ruler-card h3{ font-size:13px; font-family:var(--font-mono); letter-spacing:0.06em; color:var(--paper-dim); font-weight:500; margin-bottom:18px; text-transform:uppercase;}
+  .ruler-track{
+    position:relative; height:10px; border-radius:6px;
+    background:linear-gradient(90deg, #ff4e1f 0%, #ff7a3d 10%, #ffd7a8 26%, #fff6ea 40%, #ffffff 48%, #eaf1ff 56%, #cfe0ff 68%, #6fa8ff 85%, #3d7dff 100%);
+    margin:0 6px;
+  }
+  .ruler-ticks{ position:relative; height:64px; margin-top:6px; }
+  .tick{ position:absolute; top:0; transform:translateX(-50%); text-align:center; width:90px; }
+  .tick .stem{ width:1px; height:8px; background:var(--line); margin:0 auto 6px; }
+  .tick .k{ font-family:var(--font-mono); font-size:12px; color:var(--paper); }
+  .tick .name{ font-size:11px; color:var(--paper-dimmer); margin-top:2px; }
+
+  /* ---------- Role cards ---------- */
+  .roles{ display:grid; gap:14px; margin-top:6px; }
+  .role-card{
+    background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius-m);
+    padding:18px 20px; display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start;
+  }
+  .role-swatch{
+    width:34px; height:34px; border-radius:50%; margin-top:2px; flex-shrink:0;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.06) inset;
+  }
+  .role-swatch.key{ background:radial-gradient(circle at 32% 32%, #fff2d9, #ffb35c 60%, #cf7c1e); }
+  .role-swatch.fill{ background:radial-gradient(circle at 32% 32%, #dfe9ff, #6fa8ff 60%, #2f5fc9); }
+  .role-swatch.back{ background:radial-gradient(circle at 32% 32%, #f2eaff, #b892ff 60%, #6b3fc9); }
+  .role-card h4{ font-family:var(--font-display); font-size:16px; margin:0 0 6px; }
+  .role-card p{ font-size:14px; color:var(--paper-dim); margin:0; }
+  .role-tag{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.06em; color:var(--paper-dimmer); text-transform:uppercase; }
+
+  /* ---------- Thumbnails ---------- */
+  .thumbs{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:28px; }
+  .thumb{ text-align:center; }
+  .thumb canvas{ width:100%; aspect-ratio:4/3; background:#0e0f13; border-radius:var(--radius-s); border:1px solid var(--line-soft); display:block; }
+  .thumb .cap{ font-family:var(--font-mono); font-size:11px; color:var(--paper-dimmer); margin-top:8px; letter-spacing:0.02em; }
+  @media (max-width:520px){ .thumbs{ grid-template-columns:1fr; } }
+
+  /* ---------- Studio ---------- */
+  .studio-section{ padding:76px 0 96px; border-top:1px solid var(--line-soft); background:linear-gradient(180deg, transparent, rgba(255,255,255,0.012)); }
+  .studio-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:30px; }
+  .studio-head h2{ font-size:clamp(26px,3.4vw,36px); margin-top:16px; }
+
+  .mode-tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+  .mode-tab{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.03em;
+    background:var(--panel); border:1px solid var(--line); color:var(--paper-dim);
+    padding:10px 16px; border-radius:99px; cursor:pointer;
+    transition:all 0.15s ease;
+  }
+  .mode-tab:hover{ border-color:var(--brass-dim); color:var(--paper); }
+  .mode-tab.active{ background:var(--brass); border-color:var(--brass); color:#181920; font-weight:600; }
+
+  .hint-bar{
+    font-size:13.5px; color:var(--paper-dim); background:var(--panel);
+    border:1px solid var(--line-soft); border-left:2px solid var(--brass);
+    padding:12px 16px; border-radius:0 var(--radius-s) var(--radius-s) 0; margin-bottom:26px;
+  }
+  .hint-bar b{ color:var(--paper); }
+
+  .studio-grid{
+    display:grid; grid-template-columns: minmax(0,1.15fr) minmax(320px,0.85fr);
+    gap:28px; align-items:start;
+  }
+  @media (max-width:980px){ .studio-grid{ grid-template-columns:1fr; } }
+
+  .camera-panel{
+    background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius-m);
+    padding:16px; position:sticky; top:80px;
+  }
+  @media (max-width:980px){ .camera-panel{ position:static; } }
+  .camera-frame{
+    position:relative; border-radius:var(--radius-s); overflow:hidden;
+    border:1px solid var(--line); background:#000;
+  }
+  .camera-frame canvas{ width:100%; display:block; aspect-ratio:4/3; }
+  .hud{
+    position:absolute; inset:0; pointer-events:none;
+    font-family:var(--font-mono); font-size:11px; color:rgba(236,233,226,0.82);
+    text-shadow:0 1px 2px rgba(0,0,0,0.8);
+  }
+  .hud-corner{ position:absolute; padding:10px 12px; }
+  .hud-tl{ top:0; left:0; }
+  .hud-tr{ top:0; right:0; text-align:right; }
+  .hud-bl{ bottom:0; left:0; }
+  .hud-br{ bottom:0; right:0; text-align:right; }
+  .hud .rec{ display:flex; align-items:center; gap:6px; }
+  .hud .rec-dot{ width:6px; height:6px; border-radius:50%; background:#ff4444; box-shadow:0 0 6px #ff4444; }
+  .hud .mismatch-ok{ color:var(--ok); }
+  .hud .mismatch-warm{ color:var(--ember); }
+  .hud .mismatch-cool{ color:var(--arctic); }
+
+  .camera-caption{ display:flex; justify-content:space-between; margin-top:12px; font-family:var(--font-mono); font-size:11px; color:var(--paper-dimmer); padding:0 2px; }
+
+  /* ---------- Controls ---------- */
+  .controls{ display:flex; flex-direction:column; gap:16px; }
+  .ctrl-card{
+    background:var(--panel); border:1px solid var(--line-soft); border-radius:var(--radius-m);
+    padding:18px 18px 16px;
+  }
+  .ctrl-card.dim{ opacity:0.42; filter:saturate(0.5); pointer-events:none; }
+  .ctrl-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .ctrl-card-title{ font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--paper-dim); display:flex; align-items:center; gap:8px; }
+  .light-dot{ width:9px; height:9px; border-radius:50%; }
+  .light-dot.key{ background:#ffb35c; }
+  .light-dot.fill{ background:#6fa8ff; }
+  .light-dot.back{ background:#b892ff; }
+
+  .switch{ position:relative; display:inline-block; width:34px; height:19px; flex-shrink:0; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .track{ position:absolute; inset:0; background:var(--panel-3); border:1px solid var(--line); border-radius:99px; transition:background 0.15s ease; cursor:pointer; }
+  .switch .knob{ position:absolute; width:13px; height:13px; left:2px; top:2px; background:var(--paper-dimmer); border-radius:50%; transition:transform 0.15s ease, background 0.15s ease; }
+  .switch input:checked + .track{ background:rgba(201,164,103,0.28); border-color:var(--brass-dim); }
+  .switch input:checked + .track .knob{ transform:translateX(15px); background:var(--brass); }
+  .switch input:focus-visible + .track{ outline:2px solid var(--brass); outline-offset:2px; }
+
+  .field{ margin-top:12px; }
+  .field-label{
+    display:flex; justify-content:space-between; font-size:11.5px;
+    color:var(--paper-dimmer); margin-bottom:6px; font-family:var(--font-mono);
+  }
+  .field-label b{ color:var(--paper); font-weight:500; }
+
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:2px;
+    background:var(--panel-3); outline:none; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--stage); cursor:pointer;
+    box-shadow:0 0 0 1px var(--line);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:13px; height:13px; border-radius:50%; background:var(--paper);
+    border:2px solid var(--stage); cursor:pointer;
+  }
+  .rng-kelvin::-webkit-slider-thumb{ background:var(--brass); }
+
+  .chips{ display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+  .chip{
+    font-family:var(--font-mono); font-size:10.5px; padding:5px 9px; border-radius:6px;
+    background:var(--panel-3); border:1px solid var(--line); color:var(--paper-dim);
+    cursor:pointer; transition:all 0.12s ease;
+  }
+  .chip:hover{ border-color:var(--brass-dim); color:var(--paper); }
+  .chip.active{ background:var(--brass); border-color:var(--brass); color:#181920; font-weight:600; }
+
+  .dial-wrap{ display:flex; justify-content:center; margin:8px 0 4px; }
+  .dial{
+    position:relative; width:180px; height:180px; border-radius:50%;
+    background:
+      radial-gradient(circle, transparent 0 55px, var(--line-soft) 55.5px 56.5px, transparent 57px),
+      radial-gradient(circle, var(--panel-2), var(--panel-3) 70%, var(--panel-2));
+    border:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .dial-cross{ position:absolute; inset:0; }
+  .dial-cross::before, .dial-cross::after{
+    content:''; position:absolute; background:var(--line-soft);
+  }
+  .dial-cross::before{ left:50%; top:8px; bottom:8px; width:1px; transform:translateX(-50%); }
+  .dial-cross::after{ top:50%; left:8px; right:8px; height:1px; transform:translateY(-50%); }
+  .dial-subject{
+    position:absolute; left:50%; top:50%; width:14px; height:14px; border-radius:50%;
+    background:var(--paper-dimmer); transform:translate(-50%,-50%);
+    box-shadow:0 0 0 4px rgba(236,233,226,0.06);
+  }
+  .dial-cam{
+    position:absolute; left:50%; bottom:-9px; transform:translateX(-50%);
+    font-family:var(--font-mono); font-size:9px; letter-spacing:0.06em; color:var(--paper-dimmer);
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  .dial-cam .icon{ width:16px; height:11px; border:1px solid var(--paper-dimmer); border-radius:2px; position:relative; }
+  .dial-cam .icon::after{ content:''; position:absolute; right:-5px; top:2px; width:5px; height:6px; background:var(--stage); border:1px solid var(--paper-dimmer); border-left:none; }
+
+  .handle{
+    position:absolute; width:26px; height:26px; border-radius:50%;
+    transform:translate(-50%,-50%);
+    display:flex; align-items:center; justify-content:center;
+    cursor:grab; touch-action:none;
+    border:2px solid var(--stage);
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+  .handle:active{ cursor:grabbing; }
+  .handle.key{ background:#ffb35c; }
+  .handle.fill{ background:#6fa8ff; }
+  .handle.back{ background:#b892ff; }
+  .handle.off{ opacity:0.3; }
+  .handle::after{ content:''; width:6px; height:6px; border-radius:50%; background:rgba(0,0,0,0.35); }
+
+  .btn-row{ display:flex; gap:10px; margin-top:4px; }
+  .btn{
+    font-family:var(--font-mono); font-size:11.5px; padding:10px 14px; border-radius:8px;
+    background:var(--panel-2); border:1px solid var(--line); color:var(--paper-dim);
+    cursor:pointer; flex:1; text-align:center; transition:all 0.12s ease;
+  }
+  .btn:hover{ border-color:var(--brass-dim); color:var(--paper); }
+
+  /* ---------- Reference / cheat sheet ---------- */
+  .reference{ padding:70px 0 60px; border-top:1px solid var(--line-soft); }
+  .ref-grid{ display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:30px; }
+  @media (max-width:780px){ .ref-grid{ grid-template-columns:1fr; } }
+  .ref-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  .ref-table th{ text-align:left; font-family:var(--font-mono); font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color:var(--paper-dimmer); padding-bottom:10px; border-bottom:1px solid var(--line-soft); font-weight:500; }
+  .ref-table td{ padding:10px 0; border-bottom:1px solid var(--line-soft); color:var(--paper-dim); }
+  .ref-table td:first-child{ color:var(--paper); font-family:var(--font-mono); white-space:nowrap; }
+  .swatch-sm{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px; }
+
+  footer{ padding:36px 0 60px; text-align:center; }
+  footer p{ font-size:12.5px; color:var(--paper-dimmer); font-family:var(--font-mono); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#top" class="wordmark"><span class="dot"></span>Lighting Lab</a>
+    <nav class="topnav">
+      <a href="#temp">Color Temperature</a>
+      <a href="#three">Three-Point Lighting</a>
+      <a href="#studio">Studio</a>
+      <a href="#reference">Quick Reference</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">A lesson in two variables</div>
+      <h1>Same shot. Two dials that change everything.</h1>
+      <p class="lede">Every frame of video is shaped by where light comes from and what color it is. This page teaches both, then hands you the controls: a fixed camera, three movable lights, and a white balance dial you can push until it breaks.</p>
+      <div class="kelvin-rule"></div>
+      <div class="hero-foot">
+        <span><b>Part 01</b> — Color Temperature &amp; White Balance</span>
+        <span><b>Part 02</b> — Three-Point Lighting</span>
+        <span><b>Studio</b> — Both, live</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 1: COLOR TEMPERATURE ============ -->
+  <section class="lesson" id="temp">
+    <div class="wrap">
+      <div class="eyebrow">Part 01 — Color Temperature</div>
+      <h2>Light has a color, even when it looks white</h2>
+
+      <div class="lesson-grid">
+        <div class="lesson-copy">
+          <p>Every light source gives off a color. We measure it in <strong>Kelvin (K)</strong>, a scale left over from physics: it's the color a theoretical block of metal would glow if you heated it to that temperature. You don't need the physics, just the result — a candle flame sits around 1,900K, a household tungsten bulb around 3,200K, daylight around 5,600K, and an overcast sky can push past 7,000K.</p>
+          <p>Here's the part that trips people up: <strong>low Kelvin numbers look warm and orange, high Kelvin numbers look cool and blue.</strong> It's backwards from how we talk about temperature in everyday life — a "cool blue" flame is actually the hottest part of the fire.</p>
+          <p><strong>White balance</strong> is the camera's correction for this. You tell the camera what color of light it's looking at, and it shifts everything to compensate so that white objects actually look white and skin tones look natural. Set white balance to match your light, and the color cast disappears. Mismatch them, and you get a visible tint: too orange if the camera is compensating for cooler light than you actually have, too blue if it's compensating for warmer light than you actually have.</p>
+          <div class="callout">
+            <b>Why this matters on set</b>
+            A window doing daylight (5,600K) next to a lamp doing tungsten (3,200K) in the same shot is a mixed-lighting problem — your camera can only be correctly balanced for one of them at a time. Gaffers fix this physically with colored gels (CTB gel cools tungsten toward daylight, CTO gel warms daylight toward tungsten). You can fix it electronically with white balance, but only for one light source per shot.
+          </div>
+          <a href="#studio" class="studio-link">Try it in the Studio <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+
+        <div class="ruler-card">
+          <h3>The Kelvin scale, in familiar light</h3>
+          <div class="ruler-track"></div>
+          <div class="ruler-ticks" id="rulerTicks"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 2: THREE-POINT LIGHTING ============ -->
+  <section class="lesson" id="three">
+    <div class="wrap">
+      <div class="eyebrow">Part 02 — Three-Point Lighting</div>
+      <h2>Three lights, three different jobs</h2>
+
+      <div class="lesson-grid">
+        <div class="lesson-copy">
+          <p>Three-point lighting isn't three equally important lights pointed at a face. It's <strong>one main light, plus two supporting lights</strong>, each doing a specific job. Once you know the job, you know where each light belongs.</p>
+          <p>Change any one of the three and the whole read of the shot changes — a strong key with no fill reads as dramatic or moody; the same key with a bright fill reads as flat, even, corporate. The <strong>ratio</strong> between key and fill brightness is really a contrast dial for the whole face.</p>
+
+          <div class="thumbs" aria-hidden="false">
+            <div class="thumb">
+              <canvas id="thumbKey" width="320" height="240"></canvas>
+              <div class="cap">Key only</div>
+            </div>
+            <div class="thumb">
+              <canvas id="thumbKeyFill" width="320" height="240"></canvas>
+              <div class="cap">Key + Fill</div>
+            </div>
+            <div class="thumb">
+              <canvas id="thumbFull" width="320" height="240"></canvas>
+              <div class="cap">Key + Fill + Back</div>
+            </div>
+          </div>
+
+          <a href="#studio" class="studio-link">Move the lights yourself <svg viewBox="0 0 12 12" fill="none"><path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+
+        <div class="roles">
+          <div class="role-card">
+            <div class="role-swatch key"></div>
+            <div>
+              <div class="role-tag">Light 1</div>
+              <h4>Key</h4>
+              <p>The main light and the one you set exposure by. It decides which side of the face is bright and where the shadow falls. Usually placed to one side of the camera and a little above eye level, roughly 30–45° off-axis.</p>
+            </div>
+          </div>
+          <div class="role-card">
+            <div class="role-swatch fill"></div>
+            <div>
+              <div class="role-tag">Light 2</div>
+              <h4>Fill</h4>
+              <p>Softens the shadow the key creates, without erasing it. Placed on the opposite side of the key, and almost always dimmer — if fill matches key, the face goes flat and loses its shape.</p>
+            </div>
+          </div>
+          <div class="role-card">
+            <div class="role-swatch back"></div>
+            <div>
+              <div class="role-tag">Light 3</div>
+              <h4>Back (rim / hair light)</h4>
+              <p>Placed behind the subject, aimed forward and usually kept out of frame. It traces a thin edge of light along hair and shoulders that separates the subject from the background — especially useful when the backdrop is a similar tone to the subject.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ STUDIO ============ -->
+  <section class="studio-section" id="studio">
+    <div class="wrap">
+      <div class="studio-head">
+        <div>
+          <div class="eyebrow">The Studio</div>
+          <h2>Now drive both at once</h2>
+        </div>
+        <div class="mode-tabs" role="tablist" aria-label="Studio mode">
+          <button class="mode-tab active" data-mode="wb" role="tab" aria-selected="true">White Balance</button>
+          <button class="mode-tab" data-mode="three" role="tab" aria-selected="false">Three-Point Lighting</button>
+          <button class="mode-tab" data-mode="free" role="tab" aria-selected="false">Free Play</button>
+        </div>
+      </div>
+
+      <div class="hint-bar" id="hintBar"></div>
+
+      <div class="studio-grid">
+        <!-- CAMERA VIEW -->
+        <div class="camera-panel">
+          <div class="camera-frame">
+            <canvas id="mainCanvas" width="960" height="720"></canvas>
+            <div class="hud">
+              <div class="hud-corner hud-tl">
+                <div class="rec"><span class="rec-dot"></span>CAM 01 · FIXED</div>
+              </div>
+              <div class="hud-corner hud-tr" id="hudWB"></div>
+              <div class="hud-corner hud-bl" id="hudLights"></div>
+              <div class="hud-corner hud-br" id="hudMismatch"></div>
+            </div>
+          </div>
+          <div class="camera-caption">
+            <span>50MM · f/2.8</span>
+            <span id="capCenter">LIGHTING LAB</span>
+            <span id="capClock">00:00:00</span>
+          </div>
+        </div>
+
+        <!-- CONTROLS -->
+        <div class="controls">
+
+          <!-- White balance card -->
+          <div class="ctrl-card" id="cardWB">
+            <div class="ctrl-card-head">
+              <div class="ctrl-card-title">Color Temperature</div>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span>Light source</span><b id="valSource">3200K</b></div>
+              <input type="range" class="rng-kelvin" id="rngSource" min="1000" max="10000" step="50" value="3200">
+              <div class="chips" id="chipsSource"></div>
+            </div>
+
+            <div class="field">
+              <div class="field-label"><span>Camera white balance</span><b id="valWB">3200K</b></div>
+              <input type="range" class="rng-kelvin" id="rngWB" min="1000" max="10000" step="50" value="3200">
+              <div class="chips" id="chipsWB"></div>
+            </div>
+          </div>
+
+          <!-- Key light card -->
+          <div class="ctrl-card" id="cardLights">
+            <div class="ctrl-card-head">
+              <div class="ctrl-card-title"><span class="light-dot key"></span>Key light</div>
+              <label class="switch"><input type="checkbox" id="onKey" checked><span class="track"><span class="knob"></span></span></label>
+            </div>
+            <div class="field">
+              <div class="field-label"><span>Elevation</span><b id="valElevKey">45°</b></div>
+              <input type="range" id="rngElevKey" min="0" max="90" step="1" value="45">
+            </div>
+            <div class="field">
+              <div class="field-label"><span>Intensity</span><b id="valIntKey">85%</b></div>
+              <input type="range" id="rngIntKey" min="0" max="100" step="1" value="85">
+            </div>
+
+            <div class="ctrl-card-head" style="margin-top:18px;">
+              <div class="ctrl-card-title"><span class="light-dot fill"></span>Fill light</div>
+              <label class="switch"><input type="checkbox" id="onFill" checked><span class="track"><span class="knob"></span></span></label>
+            </div>
+            <div class="field">
+              <div class="field-label"><span>Elevation</span><b id="valElevFill">30°</b></div>
+              <input type="range" id="rngElevFill" min="0" max="90" step="1" value="30">
+            </div>
+            <div class="field">
+              <div class="field-label"><span>Intensity</span><b id="valIntFill">40%</b></div>
+              <input type="range" id="rngIntFill" min="0" max="100" step="1" value="40">
+            </div>
+
+            <div class="ctrl-card-head" style="margin-top:18px;">
+              <div class="ctrl-card-title"><span class="light-dot back"></span>Back light</div>
+              <label class="switch"><input type="checkbox" id="onBack" checked><span class="track"><span class="knob"></span></span></label>
+            </div>
+            <div class="field">
+              <div class="field-label"><span>Elevation</span><b id="valElevBack">70°</b></div>
+              <input type="range" id="rngElevBack" min="0" max="90" step="1" value="70">
+            </div>
+            <div class="field">
+              <div class="field-label"><span>Intensity</span><b id="valIntBack">55%</b></div>
+              <input type="range" id="rngIntBack" min="0" max="100" step="1" value="55">
+            </div>
+          </div>
+
+          <!-- Dial card -->
+          <div class="ctrl-card" id="cardDial">
+            <div class="ctrl-card-head">
+              <div class="ctrl-card-title">Position (top-down)</div>
+            </div>
+            <div class="dial-wrap">
+              <div class="dial" id="dial">
+                <div class="dial-cross"></div>
+                <div class="dial-subject"></div>
+                <div class="dial-cam"><div class="icon"></div>CAMERA</div>
+                <button class="handle key" id="handleKey" aria-label="Key light position, drag or use arrow keys" tabindex="0"></button>
+                <button class="handle fill" id="handleFill" aria-label="Fill light position, drag or use arrow keys" tabindex="0"></button>
+                <button class="handle back" id="handleBack" aria-label="Back light position, drag or use arrow keys" tabindex="0"></button>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn" id="btnReset">Reset to classic 3-point</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REFERENCE ============ -->
+  <section class="reference" id="reference">
+    <div class="wrap">
+      <div class="eyebrow">Quick reference</div>
+      <h2>Keep this open while you shoot</h2>
+      <div class="ref-grid">
+        <div>
+          <table class="ref-table">
+            <thead><tr><th>Kelvin</th><th>Source</th></tr></thead>
+            <tbody>
+              <tr><td>1,900K</td><td>Candlelight, open flame</td></tr>
+              <tr><td>2,700K</td><td>Household "warm white" bulb</td></tr>
+              <tr><td>3,200K</td><td>Tungsten / studio fresnel</td></tr>
+              <tr><td>4,000K</td><td>Fluorescent tube (typical)</td></tr>
+              <tr><td>5,600K</td><td>Daylight, direct sun, most LED panels</td></tr>
+              <tr><td>6,500K</td><td>Overcast sky</td></tr>
+              <tr><td>8,000K+</td><td>Open shade, blue-hour sky</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <table class="ref-table">
+            <thead><tr><th>Light</th><th>Job</th></tr></thead>
+            <tbody>
+              <tr><td><span class="swatch-sm" style="background:#ffb35c"></span>Key</td><td>Sets exposure and shadow direction. One main source, ~30–45° off-axis.</td></tr>
+              <tr><td><span class="swatch-sm" style="background:#6fa8ff"></span>Fill</td><td>Softens the key's shadow. Opposite side, always dimmer than key.</td></tr>
+              <tr><td><span class="swatch-sm" style="background:#b892ff"></span>Back</td><td>Separates subject from background. Behind subject, kept out of frame.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>LIGHTING LAB — an interactive primer on color temperature and three-point lighting</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     UTILITIES
+  ============================================================ */
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function deg2rad(d){ return d * Math.PI / 180; }
+
+  // Tanner Helland's Kelvin -> RGB approximation
+  function kelvinToRGB(kelvin){
+    var temp = clamp(kelvin,1000,40000) / 100;
+    var r,g,b;
+    if(temp <= 66){
+      r = 255;
+      g = 99.4708025861 * Math.log(temp) - 161.1195681661;
+      if(temp <= 19){ b = 0; }
+      else { b = 138.5177312231 * Math.log(temp - 10) - 305.0447927307; }
+    } else {
+      r = 329.698727446 * Math.pow(temp - 60, -0.1332047592);
+      g = 288.1221695283 * Math.pow(temp - 60, -0.0755148492);
+      b = 255;
+    }
+    return { r: clamp(r,0,255), g: clamp(g,0,255), b: clamp(b,0,255) };
+  }
+  function rgbCss(c, a){ return 'rgba(' + Math.round(c.r) + ',' + Math.round(c.g) + ',' + Math.round(c.b) + ',' + (a===undefined?1:a) + ')'; }
+
+  function kelvinLabel(k){
+    if(k < 2300) return 'Candle';
+    if(k < 3600) return 'Tungsten';
+    if(k < 4600) return 'Fluorescent';
+    if(k < 6000) return 'Daylight';
+    if(k < 7500) return 'Overcast';
+    return 'Shade';
+  }
+
+  var KELVIN_PRESETS = [
+    {k:1900, label:'Candle'},
+    {k:3200, label:'Tungsten'},
+    {k:4000, label:'Fluorescent'},
+    {k:5600, label:'Daylight'},
+    {k:6500, label:'Overcast'},
+    {k:8000, label:'Shade'}
+  ];
+
+  /* ============================================================
+     STATE
+  ============================================================ */
+  var state = {
+    mode: 'wb',
+    sourceKelvin: 3200,
+    cameraWB: 3200,
+    lights: {
+      key:  { on:true, azimuth: 40,  elevation:45, intensity:85 },
+      fill: { on:true, azimuth: 325, elevation:30, intensity:40 },
+      back: { on:true, azimuth: 175, elevation:70, intensity:55 }
+    }
+  };
+
+  var DEFAULT_LIGHTS = JSON.parse(JSON.stringify(state.lights));
+
+  /* ============================================================
+     CORE SCENE RENDER  (shared by main canvas + thumbnails)
+  ============================================================ */
+  function computeLightGeom(light){
+    var az = deg2rad(light.azimuth);
+    var dx = -Math.sin(az);            // -1 (screen left) .. 1 (screen right)
+    var frontality = Math.cos(az);     // 1 front .. -1 back
+    var dy = 1 - (light.elevation/90)*2; // 1 bottom(low) .. -1 top(high)
+    return { dx: dx, dy: dy, frontality: frontality };
+  }
+
+  function drawScene(ctx, w, h, lights, sourceKelvin, cameraWB, opts){
+    opts = opts || {};
+    ctx.clearRect(0,0,w,h);
+
+    // --- backdrop ---
+    var bg = ctx.createLinearGradient(0,0,0,h);
+    bg.addColorStop(0,'#2a2c33');
+    bg.addColorStop(1,'#111217');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,w,h);
+
+    // subtle floor line
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.fillRect(0, h*0.82, w, h*0.18);
+
+    var faceCx = w*0.5;
+    var faceCy = h*0.46;
+    var faceR = Math.min(w,h)*0.22;
+
+    // --- shoulders ---
+    ctx.save();
+    ctx.fillStyle = '#3a3c44';
+    ctx.beginPath();
+    ctx.moveTo(faceCx - faceR*1.9, h*0.98);
+    ctx.quadraticCurveTo(faceCx - faceR*1.9, h*0.72, faceCx - faceR*0.85, h*0.7);
+    ctx.quadraticCurveTo(faceCx, h*0.66, faceCx + faceR*0.85, h*0.7);
+    ctx.quadraticCurveTo(faceCx + faceR*1.9, h*0.72, faceCx + faceR*1.9, h*0.98);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // --- base head (mid grey so additive light + multiply shadow both read) ---
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(faceCx, faceCy, faceR*0.86, faceR*1.05, 0, 0, Math.PI*2);
+    ctx.fillStyle = '#4b4d55';
+    ctx.fill();
+    ctx.restore();
+
+    var srcColor = kelvinToRGB(sourceKelvin);
+    var order = ['back','fill','key']; // draw back first so key/fill sit on top
+    var geoms = {};
+    var dominant = null, dominantScore = -Infinity;
+
+    order.forEach(function(key){
+      var light = lights[key];
+      var g = computeLightGeom(light);
+      geoms[key] = g;
+      if(light.on){
+        var score = light.intensity * Math.max(g.frontality, 0.05);
+        if(key === 'key') score *= 1.35; // key is the natural shaping light
+        if(score > dominantScore){ dominantScore = score; dominant = { key:key, g:g }; }
+      }
+    });
+
+    // --- shadow (multiply), shaped opposite the dominant frontal light ---
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(faceCx, faceCy, faceR*0.86, faceR*1.05, 0, 0, Math.PI*2);
+    ctx.clip();
+    var fillLight = lights.fill;
+    var fillReduction = (fillLight.on ? (fillLight.intensity/100) : 0) * 0.6;
+    var baseAlpha = clamp(0.5 - fillReduction, 0.06, 0.5);
+    if(dominant){
+      var sx = faceCx - dominant.g.dx * faceR * 1.3;
+      var shGrad = ctx.createRadialGradient(sx, faceCy, faceR*0.1, sx, faceCy, faceR*1.7);
+      shGrad.addColorStop(0, 'rgba(0,0,0,' + baseAlpha + ')');
+      shGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = shGrad;
+      ctx.fillRect(faceCx-faceR*2, faceCy-faceR*2, faceR*4, faceR*4);
+    }
+    ctx.restore();
+
+    // --- light contributions (additive blobs + rim) ---
+    ['key','fill','back'].forEach(function(key){
+      var light = lights[key];
+      if(!light.on || light.intensity <= 0) return;
+      var g = geoms[key];
+      var blobWeight = clamp((g.frontality + 0.2) / 0.6, 0, 1); // fades to rim as it swings behind
+      var rimWeight = 1 - blobWeight;
+      var alpha = 0.12 + (light.intensity/100) * 0.55;
+      var col = srcColor;
+
+      if(blobWeight > 0.02){
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(faceCx, faceCy, faceR*0.86, faceR*1.05, 0, 0, Math.PI*2);
+        ctx.clip();
+        ctx.globalCompositeOperation = 'lighter';
+        var bx = faceCx + g.dx * faceR * 0.95;
+        var by = faceCy + g.dy * faceR * 0.65;
+        var br = faceR * (0.55 + (light.intensity/100)*0.55);
+        var grad = ctx.createRadialGradient(bx, by, 0, bx, by, br);
+        grad.addColorStop(0, rgbCss(col, alpha*blobWeight));
+        grad.addColorStop(1, rgbCss(col, 0));
+        ctx.fillStyle = grad;
+        ctx.fillRect(faceCx-faceR*2, faceCy-faceR*2, faceR*4, faceR*4);
+        ctx.restore();
+      }
+
+      if(rimWeight > 0.04){
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineWidth = faceR * 0.16 * (0.4 + (light.intensity/100)*0.9);
+        ctx.strokeStyle = rgbCss(col, clamp(0.16 + rimWeight*0.7,0,0.85) * (light.intensity/100 + 0.3));
+        ctx.beginPath();
+        ctx.ellipse(faceCx, faceCy, faceR*0.9, faceR*1.08, 0, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    });
+
+    // --- simple facial guides (so it reads as a face, not just a blob) ---
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(faceCx - faceR*0.28, faceCy - faceR*0.05, faceR*0.06, 0, Math.PI*2);
+    ctx.moveTo(faceCx + faceR*0.16, faceCy - faceR*0.11);
+    ctx.arc(faceCx + faceR*0.28, faceCy - faceR*0.05, faceR*0.06, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(faceCx-faceR*0.1, faceCy+faceR*0.38);
+    ctx.quadraticCurveTo(faceCx, faceCy+faceR*0.46, faceCx+faceR*0.1, faceCy+faceR*0.38);
+    ctx.stroke();
+    ctx.restore();
+
+    // --- color-cast overlay from WB mismatch ---
+    if(!opts.skipCast){
+      var delta = sourceKelvin - cameraWB; // negative -> orange cast, positive -> blue cast
+      var mag = clamp(Math.abs(delta) / 4500, 0, 0.62);
+      if(mag > 0.01){
+        var castColor = delta < 0 ? {r:255,g:110,b:40} : {r:70,g:130,b:255};
+        ctx.save();
+        ctx.globalCompositeOperation = 'overlay';
+        ctx.fillStyle = rgbCss(castColor, mag);
+        ctx.fillRect(0,0,w,h);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = rgbCss(castColor, mag*0.35);
+        ctx.fillRect(0,0,w,h);
+        ctx.restore();
+      }
+    }
+
+    // vignette
+    ctx.save();
+    var vg = ctx.createRadialGradient(w/2,h/2, h*0.25, w/2,h/2, h*0.75);
+    vg.addColorStop(0,'rgba(0,0,0,0)');
+    vg.addColorStop(1,'rgba(0,0,0,0.35)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0,0,w,h);
+    ctx.restore();
+  }
+
+  /* ============================================================
+     IN-PAGE NAVIGATION (header links + "try it" CTAs)
+  ============================================================ */
+  document.querySelectorAll('a[href^="#"]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      var id = link.getAttribute('href').slice(1);
+      var target = document.getElementById(id);
+      if(!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior:'smooth', block:'start' });
+      try{ history.pushState(null, '', '#' + id); }catch(err){ /* sandboxed iframes may block this, safe to ignore */ }
+    });
+  });
+
+  /* ============================================================
+     MAIN CANVAS + HUD
+  ============================================================ */
+  var mainCanvas = document.getElementById('mainCanvas');
+  var mctx = mainCanvas.getContext('2d');
+
+  function renderMain(){
+    drawScene(mctx, mainCanvas.width, mainCanvas.height, state.lights, state.sourceKelvin, state.cameraWB, {});
+    updateHUD();
+    positionHandles();
+  }
+
+  function updateHUD(){
+    var delta = state.sourceKelvin - state.cameraWB;
+    var hudWB = document.getElementById('hudWB');
+    hudWB.innerHTML = 'WB ' + state.cameraWB + 'K<br><span style="color:var(--paper-dimmer)">' + kelvinLabel(state.cameraWB) + '</span>';
+
+    var names = [];
+    ['key','fill','back'].forEach(function(k){
+      if(state.lights[k].on) names.push(k.toUpperCase());
+    });
+    document.getElementById('hudLights').innerHTML = (names.length ? names.join(' · ') : 'NO LIGHTS') ;
+
+    var mm = document.getElementById('hudMismatch');
+    var absd = Math.abs(delta);
+    if(absd < 150){
+      mm.innerHTML = '<span class="mismatch-ok">MATCHED</span>';
+    } else {
+      var cls = delta < 0 ? 'mismatch-warm' : 'mismatch-cool';
+      var word = delta < 0 ? 'WARM CAST' : 'COOL CAST';
+      mm.innerHTML = '<span class="' + cls + '">' + word + ' · ' + (absd|0) + 'K</span>';
+    }
+  }
+
+  function tickClock(){
+    var d = new Date();
+    var pad = function(n){ return (n<10?'0':'')+n; };
+    document.getElementById('capClock').textContent = pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  }
+  setInterval(tickClock, 1000);
+  tickClock();
+
+  /* ============================================================
+     RULER (section 1)
+  ============================================================ */
+  (function buildRuler(){
+    var container = document.getElementById('rulerTicks');
+    var items = [
+      {k:1900, name:'Candlelight'},
+      {k:3200, name:'Tungsten bulb'},
+      {k:4000, name:'Fluorescent'},
+      {k:5600, name:'Daylight'},
+      {k:6500, name:'Overcast'},
+      {k:8000, name:'Open shade'}
+    ];
+    var min = 1000, max = 10000;
+    items.forEach(function(it){
+      var pct = (it.k - min) / (max - min) * 100;
+      var el = document.createElement('div');
+      el.className = 'tick';
+      el.style.left = clamp(pct,4,96) + '%';
+      el.innerHTML = '<div class="stem"></div><div class="k">' + it.k.toLocaleString() + 'K</div><div class="name">' + it.name + '</div>';
+      container.appendChild(el);
+    });
+  })();
+
+  /* ============================================================
+     THUMBNAILS (section 2)
+  ============================================================ */
+  (function buildThumbs(){
+    var base = {
+      key:  { on:true, azimuth:40, elevation:45, intensity:85 },
+      fill: { on:false, azimuth:325, elevation:30, intensity:40 },
+      back: { on:false, azimuth:175, elevation:70, intensity:55 }
+    };
+    function render(id, lights){
+      var c = document.getElementById(id);
+      var ctx = c.getContext('2d');
+      drawScene(ctx, c.width, c.height, lights, 3200, 3200, { skipCast:true });
+    }
+    render('thumbKey', base);
+    render('thumbKeyFill', { key:base.key, fill:{on:true,azimuth:325,elevation:30,intensity:40}, back:base.back });
+    render('thumbFull', { key:base.key, fill:{on:true,azimuth:325,elevation:30,intensity:40}, back:{on:true,azimuth:175,elevation:70,intensity:55} });
+  })();
+
+  /* ============================================================
+     KELVIN CHIP ROWS
+  ============================================================ */
+  function buildChips(containerId, onPick){
+    var el = document.getElementById(containerId);
+    KELVIN_PRESETS.forEach(function(p){
+      var chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.textContent = p.label;
+      chip.dataset.k = p.k;
+      chip.addEventListener('click', function(){ onPick(p.k); });
+      el.appendChild(chip);
+    });
+  }
+  function refreshChips(containerId, value){
+    var el = document.getElementById(containerId);
+    Array.prototype.forEach.call(el.children, function(chip){
+      chip.classList.toggle('active', Math.abs(parseInt(chip.dataset.k,10) - value) < 25);
+    });
+  }
+  buildChips('chipsSource', function(k){ state.sourceKelvin = k; syncFromState(); });
+  buildChips('chipsWB', function(k){ state.cameraWB = k; syncFromState(); });
+
+  /* ============================================================
+     WIRE UP SLIDERS / TOGGLES
+  ============================================================ */
+  var rngSource = document.getElementById('rngSource');
+  var rngWB = document.getElementById('rngWB');
+  rngSource.addEventListener('input', function(){ state.sourceKelvin = parseInt(this.value,10); syncFromState(); });
+  rngWB.addEventListener('input', function(){ state.cameraWB = parseInt(this.value,10); syncFromState(); });
+
+  function wireLight(key, prefix){
+    var onEl = document.getElementById('on'+prefix);
+    var elevEl = document.getElementById('rngElev'+prefix);
+    var intEl = document.getElementById('rngInt'+prefix);
+    onEl.addEventListener('change', function(){ state.lights[key].on = this.checked; syncFromState(); });
+    elevEl.addEventListener('input', function(){ state.lights[key].elevation = parseInt(this.value,10); syncFromState(); });
+    intEl.addEventListener('input', function(){ state.lights[key].intensity = parseInt(this.value,10); syncFromState(); });
+  }
+  wireLight('key','Key');
+  wireLight('fill','Fill');
+  wireLight('back','Back');
+
+  document.getElementById('btnReset').addEventListener('click', function(){
+    state.lights = JSON.parse(JSON.stringify(DEFAULT_LIGHTS));
+    syncFromState();
+  });
+
+  function syncFromState(){
+    rngSource.value = state.sourceKelvin;
+    rngWB.value = state.cameraWB;
+    document.getElementById('valSource').textContent = state.sourceKelvin.toLocaleString() + 'K';
+    document.getElementById('valWB').textContent = state.cameraWB.toLocaleString() + 'K';
+    refreshChips('chipsSource', state.sourceKelvin);
+    refreshChips('chipsWB', state.cameraWB);
+
+    document.getElementById('onKey').checked = state.lights.key.on;
+    document.getElementById('onFill').checked = state.lights.fill.on;
+    document.getElementById('onBack').checked = state.lights.back.on;
+    document.getElementById('rngElevKey').value = state.lights.key.elevation;
+    document.getElementById('rngElevFill').value = state.lights.fill.elevation;
+    document.getElementById('rngElevBack').value = state.lights.back.elevation;
+    document.getElementById('rngIntKey').value = state.lights.key.intensity;
+    document.getElementById('rngIntFill').value = state.lights.fill.intensity;
+    document.getElementById('rngIntBack').value = state.lights.back.intensity;
+    document.getElementById('valElevKey').textContent = state.lights.key.elevation + '°';
+    document.getElementById('valElevFill').textContent = state.lights.fill.elevation + '°';
+    document.getElementById('valElevBack').textContent = state.lights.back.elevation + '°';
+    document.getElementById('valIntKey').textContent = state.lights.key.intensity + '%';
+    document.getElementById('valIntFill').textContent = state.lights.fill.intensity + '%';
+    document.getElementById('valIntBack').textContent = state.lights.back.intensity + '%';
+
+    renderMain();
+  }
+
+  /* ============================================================
+     DIAL (top-down azimuth control)
+  ============================================================ */
+  var dial = document.getElementById('dial');
+  var handles = { key: document.getElementById('handleKey'), fill: document.getElementById('handleFill'), back: document.getElementById('handleBack') };
+  var RING_PCT = 40; // handle distance from center, in % of dial box
+
+  function positionHandles(){
+    var rect = dial.getBoundingClientRect();
+    if(rect.width === 0) return;
+    ['key','fill','back'].forEach(function(key){
+      var light = state.lights[key];
+      var screenAngle = deg2rad(light.azimuth + 90);
+      var x = 50 + Math.cos(screenAngle) * RING_PCT;
+      var y = 50 + Math.sin(screenAngle) * RING_PCT;
+      var h = handles[key];
+      h.style.left = x + '%';
+      h.style.top = y + '%';
+      h.classList.toggle('off', !light.on);
+    });
+  }
+
+  function angleFromPointer(clientX, clientY){
+    var rect = dial.getBoundingClientRect();
+    var cx = rect.left + rect.width/2;
+    var cy = rect.top + rect.height/2;
+    var screenAngle = Math.atan2(clientY - cy, clientX - cx); // radians
+    var azimuth = (screenAngle * 180/Math.PI) - 90;
+    azimuth = ((azimuth % 360) + 360) % 360;
+    return azimuth;
+  }
+
+  function bindHandleDrag(key, el){
+    var dragging = false;
+    el.addEventListener('pointerdown', function(e){
+      if(el.disabled) return;
+      dragging = true;
+      el.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    el.addEventListener('pointermove', function(e){
+      if(!dragging) return;
+      var az = angleFromPointer(e.clientX, e.clientY);
+      state.lights[key].azimuth = Math.round(az);
+      renderMain();
+    });
+    function end(e){ dragging = false; }
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+
+    el.addEventListener('keydown', function(e){
+      if(el.disabled) return;
+      var light = state.lights[key];
+      var changed = true;
+      if(e.key === 'ArrowLeft'){ light.azimuth = ((light.azimuth - 5) % 360 + 360) % 360; }
+      else if(e.key === 'ArrowRight'){ light.azimuth = (light.azimuth + 5) % 360; }
+      else if(e.key === 'ArrowUp'){ light.elevation = clamp(light.elevation + 5, 0, 90); }
+      else if(e.key === 'ArrowDown'){ light.elevation = clamp(light.elevation - 5, 0, 90); }
+      else { changed = false; }
+      if(changed){
+        e.preventDefault();
+        syncFromState();
+      }
+    });
+  }
+  bindHandleDrag('key', handles.key);
+  bindHandleDrag('fill', handles.fill);
+  bindHandleDrag('back', handles.back);
+
+  window.addEventListener('resize', positionHandles);
+
+  /* ============================================================
+     MODE SWITCHING
+  ============================================================ */
+  var HINTS = {
+    wb: 'White balance mode — the three lights are locked in a classic setup. Drag the two sliders above to see how a mismatched white balance shifts the whole shot orange or blue.',
+    three: 'Three-point lighting mode — white balance is locked to a matched, neutral setting so color can\'t distract you. Drag the dots on the dial, or flip lights off, to see what each one is actually doing.',
+    free: 'Free play — every control is live. Try recreating a moody interview look, a flat corporate look, or a daylight-through-a-window mismatch.'
+  };
+
+  function setCardEnabled(cardEl, enabled){
+    cardEl.classList.toggle('dim', !enabled);
+    var controls = cardEl.querySelectorAll('input, button');
+    controls.forEach(function(c){ c.disabled = !enabled; });
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    document.querySelectorAll('.mode-tab').forEach(function(t){
+      var active = t.dataset.mode === mode;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.getElementById('hintBar').innerHTML = '<b>' + (mode==='wb'?'White Balance':mode==='three'?'Three-Point Lighting':'Free Play') + '.</b> ' + HINTS[mode];
+
+    var cardWB = document.getElementById('cardWB');
+    var cardLights = document.getElementById('cardLights');
+    var cardDial = document.getElementById('cardDial');
+
+    if(mode === 'wb'){
+      setCardEnabled(cardWB, true);
+      setCardEnabled(cardLights, false);
+      setCardEnabled(cardDial, false);
+      state.lights = JSON.parse(JSON.stringify(DEFAULT_LIGHTS));
+    } else if(mode === 'three'){
+      setCardEnabled(cardWB, false);
+      setCardEnabled(cardLights, true);
+      setCardEnabled(cardDial, true);
+      state.sourceKelvin = 5600;
+      state.cameraWB = 5600;
+    } else {
+      setCardEnabled(cardWB, true);
+      setCardEnabled(cardLights, true);
+      setCardEnabled(cardDial, true);
+    }
+    syncFromState();
+  }
+
+  document.querySelectorAll('.mode-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){ setMode(tab.dataset.mode); });
+  });
+
+  /* ============================================================
+     INIT
+  ============================================================ */
+  setMode('wb');
+  window.addEventListener('load', positionHandles);
+
+})();
+</script>
+</body>
+</html>

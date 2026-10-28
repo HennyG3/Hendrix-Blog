@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Hendrix George — digital portfolio and blog on technology and music education.">
+<title>Hendrix George</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Schibsted+Grotesk:wght@400..700&display=swap">
+</head>
+<body>
+<style>
+/* Layout: Hendrix George design system — an editorial catalogue. Huge serif masthead, folder tabs on a ruled grid, outlined tag pills, brand colours only as fills. */
+:root{
+  --paper:#efe9df; --paper-raised:#f7f3ec; --ink:#0d1717; --ink-muted:#565c5b;
+  --rule:#0d1717; --outline:#7d786f; --focus:#0d1717;
+  --green:#4de89a; --cyan:#74edfc; --orange:#ff3c00; --night:#0d1717; --on-brand:#0d1717;
+  --serif:"Newsreader","Times New Roman",Georgia,serif;
+  --grotesk:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s6:24px; --s8:32px; --s12:48px; --s16:64px;
+  --r-media:10px; --r-tab:14px; --r-pill:999px;
+  --wrap:1240px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0d1717; --paper-raised:#162222; --ink:#efe9df; --ink-muted:#a9b0ad; --rule:#5c6866; --outline:#7f8a87; --focus:#74edfc; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0d1717; --paper-raised:#162222; --ink:#efe9df; --ink-muted:#a9b0ad; --rule:#5c6866; --outline:#7f8a87; --focus:#74edfc; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:17px;line-height:27px;margin:0;font-optical-sizing:auto}
+a{color:inherit}
+img{max-width:100%;display:block}
+h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+:where(a,button):focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* top bar */
+.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:var(--s4);padding-block:var(--s4);flex-wrap:wrap}
+.mark{font-family:var(--serif);font-weight:600;font-size:20px;letter-spacing:-.02em;text-decoration:none}
+.nav{display:flex;gap:var(--s6);flex-wrap:wrap}
+.nav a,.foot a{font-family:var(--grotesk);font-size:13px;line-height:16px;font-weight:600;text-decoration:none}
+.nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.nav a:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* masthead */
+.mast .wrap{padding-block:var(--s6) var(--s12)}
+.display{font-size:clamp(64px,14.2vw,184px);line-height:.92;letter-spacing:-.035em;font-weight:600;margin-left:-.04em}
+.intro{max-width:960px;margin:var(--s8) auto 0;font-size:17px;line-height:27px;text-align:justify;hyphens:auto}
+.intro b{font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.intro .more{font-family:var(--grotesk);font-size:13px;font-weight:600;white-space:nowrap;margin-left:var(--s2)}
+
+/* tabs + grid */
+.tabs{display:flex;gap:var(--s2);border-bottom:1px solid var(--rule);padding-left:clamp(16px,6vw,64px);margin-top:var(--s8)}
+.tab{font-family:var(--serif);font-size:17px;line-height:22px;color:var(--ink);background:transparent;cursor:pointer;border:1px solid var(--rule);border-bottom:0;border-radius:var(--r-tab) var(--r-tab) 0 0;padding:var(--s1) var(--s4) 3px;min-width:130px;text-align:left;margin-bottom:-1px}
+.tab[aria-selected="true"]{background:var(--orange);border-color:var(--orange);color:var(--on-brand)}
+.bar{display:flex;justify-content:flex-end;gap:var(--s2);flex-wrap:wrap;padding-block:var(--s3)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+.grid.flush{border-top:0}
+.card{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:var(--s8);display:flex;flex-direction:column;min-width:0;text-decoration:none;color:inherit}
+.card:hover .media{transform:translateY(-2px)}
+.media{position:relative;aspect-ratio:1;border-radius:var(--r-media);border:1px solid var(--rule);overflow:hidden;margin-bottom:var(--s4);transition:transform .2s ease}
+.media.wide{aspect-ratio:16/10}
+.media img{width:100%;height:100%;object-fit:cover}
+.media .badge{position:absolute;top:var(--s3);right:var(--s3)}
+.bg-orange{background:var(--orange)} .bg-green{background:var(--green)} .bg-cyan{background:var(--cyan)} .bg-night{background:var(--night)}
+.numeral{position:absolute;left:var(--s4);bottom:-.12em;font-family:var(--serif);font-weight:600;font-size:min(13vw,148px);line-height:1;letter-spacing:-.05em;color:var(--on-brand)}
+.bg-night .numeral{color:#efe9df}
+.motif{position:absolute;inset:0;width:100%;height:100%}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s2)}
+.title{font-family:var(--grotesk);font-size:17px;line-height:22px;font-weight:600;letter-spacing:-.01em;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.figure{font-size:16px;line-height:20px;white-space:nowrap}
+.meta{font-size:15px;line-height:22px;color:var(--ink-muted);margin:var(--s1) 0 var(--s6)}
+.tags{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:auto}
+.tag{display:inline-flex;align-items:center;font-family:var(--grotesk);font-size:11px;line-height:14px;font-weight:500;color:var(--ink-muted);border:1px solid var(--outline);border-radius:var(--r-pill);padding:var(--s1) var(--s2);white-space:nowrap;background:transparent}
+button.tag{cursor:pointer}
+button.tag[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.badge{display:inline-flex;font-family:var(--grotesk);font-size:11px;line-height:14px;font-weight:500;color:var(--on-brand);background:var(--cyan);border-radius:var(--r-pill);padding:var(--s1) 10px}
+.badge.green{background:var(--green)} .badge.orange{background:var(--orange)} .badge.paper{background:var(--paper-raised);color:var(--ink)}
+
+/* post */
+.post .wrap{padding-block:var(--s8) var(--s16)}
+.crumbs{display:flex;gap:var(--s2);flex-wrap:wrap;margin-bottom:var(--s8)}
+.post h1{font-size:clamp(44px,8vw,104px);line-height:.95;letter-spacing:-.03em;max-width:14ch}
+.post .kicker{font-family:var(--grotesk);font-size:13px;font-weight:600;margin-bottom:var(--s4);display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.prose{max-width:65ch;margin:var(--s12) auto 0}
+.prose p{margin:0 0 1em}
+.prose p:first-child::first-letter{font-weight:600;font-size:3.4em;float:left;line-height:.85;padding:.06em .08em 0 0}
+.soon{max-width:65ch;margin:var(--s12) auto 0;display:flex;gap:var(--s3);align-items:center;color:var(--ink-muted);font-size:15px}
+.blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule);margin-top:var(--s12)}
+.block{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:var(--s8);display:flex;flex-direction:column;gap:var(--s4);min-width:0}
+.block .head small{font-family:var(--grotesk);font-size:13px;font-weight:500;color:var(--ink-muted)}
+.frame{display:block;width:100%;aspect-ratio:16/9;border:1px solid var(--rule);border-radius:var(--r-media);background:var(--night)}
+.frame.tall{aspect-ratio:4/3}
+.block.tool{grid-column:1/-1}
+.blocks:has(.tool) .block{grid-column:1/-1}
+.toolframe{aspect-ratio:auto;height:88vh;min-height:560px;background:#14161a}
+.go{position:relative;display:flex;align-items:flex-end;aspect-ratio:16/9;border:1px solid var(--rule);border-radius:var(--r-media);overflow:hidden;text-decoration:none;color:var(--on-brand);padding:var(--s6)}
+.go.tall{aspect-ratio:4/3}
+.go.pending{aspect-ratio:auto;height:140px;width:100%;box-sizing:border-box}
+.go .label{position:relative;display:inline-flex;align-items:center;gap:var(--s3);font-family:var(--grotesk);font-weight:600;font-size:15px;background:var(--paper-raised);color:var(--ink);border-radius:var(--r-pill);padding:var(--s2) var(--s4) var(--s2) var(--s2)}
+.go .dot{width:28px;height:28px;border-radius:50%;background:var(--ink);display:grid;place-items:center}
+.go .dot svg path{fill:var(--paper-raised);stroke:var(--paper-raised)}
+.go:hover .label{background:var(--ink);color:var(--paper)}
+.go:hover .dot{background:var(--paper)}
+.go:hover .dot svg path{fill:var(--ink);stroke:var(--ink)}
+.small-link{font-family:var(--grotesk);font-size:13px;font-weight:500}
+.pager{display:grid;grid-template-columns:1fr 1fr;border-left:1px solid var(--rule);border-top:1px solid var(--rule);margin-top:var(--s12)}
+.pager a,.pager span{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:var(--s6) var(--s8);text-decoration:none;display:grid;gap:var(--s1);min-width:0}
+.pager small{font-family:var(--grotesk);font-size:13px;font-weight:600;color:var(--ink-muted)}
+.pager b{font-weight:600;font-size:22px;line-height:28px;letter-spacing:-.01em}
+.pager .next{text-align:right}
+.pager a:hover{background:var(--paper-raised)}
+
+.band{position:relative;height:clamp(180px,24vw,300px);border:1px solid var(--rule);border-radius:var(--r-media);overflow:hidden;margin-bottom:var(--s8)}
+.band img{width:100%;height:100%;object-fit:cover}
+.band .band-art{position:absolute;right:0;top:0;height:100%;width:auto;max-width:70%}
+.band .numeral{font-size:clamp(120px,20vw,260px)}
+.band img.duo + .numeral{color:#f7f3ec}
+
+/* scores */
+.block.scores{grid-column:1/-1}
+.blocks:has(.scores) .block{grid-column:1/-1}
+.blocks:has(.scores) .frame{max-width:880px}
+.score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:var(--s6)}
+.score{display:flex;flex-direction:column;gap:var(--s2);text-decoration:none;color:inherit;min-width:0}
+.score-img{border:1px solid var(--rule);border-radius:var(--r-media);overflow:hidden;background:#fff;aspect-ratio:3/2}
+.score-img img{width:100%;height:100%;object-fit:cover;object-position:top}
+.score-title{font-family:var(--grotesk);font-weight:600;font-size:17px;line-height:22px;margin-top:var(--s2)}
+.score-sub{font-size:15px;line-height:22px;color:var(--ink-muted)}
+.score-go{align-self:flex-start;font-family:var(--grotesk);font-weight:600;font-size:13px;border:1px solid var(--rule);border-radius:var(--r-pill);padding:var(--s1) var(--s3);margin-top:var(--s1)}
+.score:hover .score-go{background:var(--ink);color:var(--paper)}
+.score:hover .score-img{transform:translateY(-2px)}
+.score-img{transition:transform .2s ease}
+
+/* reading link + reading page */
+.readlink{display:flex;flex-direction:column;gap:var(--s3);text-decoration:none;color:var(--on-brand);background:var(--cyan);border:1px solid var(--rule);border-radius:var(--r-media);padding:var(--s8);min-height:220px}
+.readlink .rl-kicker{font-family:var(--grotesk);font-size:13px;font-weight:600}
+.readlink .rl-title{font-family:var(--serif);font-weight:600;font-size:clamp(26px,3vw,36px);line-height:1.05;letter-spacing:-.02em;max-width:18ch}
+.readlink .rl-sum{font-size:15px;line-height:22px;max-width:52ch}
+.readlink .rl-go{margin-top:auto;align-self:flex-start;font-family:var(--grotesk);font-weight:600;font-size:15px;background:var(--paper-raised);color:var(--ink);border-radius:var(--r-pill);padding:var(--s2) var(--s4)}
+.readlink:hover .rl-go{background:var(--ink);color:var(--paper)}
+.reading .back{display:inline-block;font-family:var(--grotesk);font-size:13px;font-weight:600;text-decoration:none;margin-bottom:var(--s6)}
+.reading h1{max-width:20ch;margin-bottom:var(--s8)}
+.reading .band{margin-top:0}
+.rbody{max-width:66ch;margin:var(--s12) auto 0}
+.rbody h2{font-size:28px;line-height:34px;letter-spacing:-.01em;margin:var(--s12) 0 var(--s4)}
+.rbody h2:first-child{margin-top:0}
+.rbody p{margin:0 0 1em}
+.rtable{margin:var(--s6) 0;overflow-x:auto}
+.rpreface{max-width:66ch;margin:var(--s8) auto 0;font-style:italic;color:var(--ink-muted);font-size:15px;line-height:23px;border-left:0}
+.rlist{margin:0 0 1em;padding-left:1.4em}
+.rlist li{margin-bottom:var(--s1)}
+.req{font-family:var(--serif);font-style:italic;font-size:20px;text-align:center;padding:var(--s6) var(--s4);margin:var(--s6) 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);overflow-x:auto;white-space:nowrap}
+.rfig{margin:var(--s8) 0}
+.rfig img{width:100%;border:1px solid var(--rule);border-radius:var(--r-media);background:#fff}
+.rfig figcaption{font-family:var(--grotesk);font-size:13px;color:var(--ink-muted);margin-top:var(--s2)}
+.rfig .rfig-num{font-weight:600;color:var(--ink);margin:0}
+.rfig .rfig-title{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);margin:0 0 var(--s3)}
+.rtable .rfig-num{font-family:var(--grotesk);font-size:13px;font-weight:600;color:var(--ink);margin:0}
+.rtable .rfig-title{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);margin:0 0 var(--s3)}
+.rtable table{border-collapse:collapse;width:100%;border-top:1px solid var(--rule)}
+.rtable th,.rtable td{border-bottom:1px solid var(--rule);padding:var(--s3) var(--s4) var(--s3) 0;text-align:left;vertical-align:top}
+.rtable th{font-family:var(--grotesk);font-size:13px;font-weight:600;white-space:nowrap;width:1%}
+.rtable td{font-size:15px;line-height:22px}
+.rtable figcaption{font-family:var(--grotesk);font-size:13px;color:var(--ink-muted);margin-top:var(--s2)}
+
+/* about + bibliography */
+.page .wrap{padding-block:var(--s8) var(--s16)}
+.page h1{font-size:clamp(48px,9vw,120px);line-height:.92;letter-spacing:-.035em}
+.about{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);border-top:1px solid var(--rule);border-left:1px solid var(--rule);margin-top:var(--s12)}
+.about>*{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:var(--s8);min-width:0}
+.about .media{aspect-ratio:4/5;margin:0}
+.about .media img{object-position:42% 35%}
+.about p{margin:0 0 1em;max-width:62ch}
+.facts{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s6)}
+.refs{list-style:none;margin:var(--s12) 0 0;padding:0;border-top:1px solid var(--rule)}
+.refnote{font-family:var(--grotesk);font-size:13px;color:var(--ink-muted);margin:var(--s4) 0 0}
+.refs a{word-break:break-all}
+.refs li{border-bottom:1px solid var(--rule);padding:var(--s6) 0 var(--s6) 2em;text-indent:-2em;max-width:80ch}
+.channel{display:inline-flex;align-items:center;gap:var(--s3);text-decoration:none;font-family:var(--grotesk);font-weight:600;font-size:13px;border:1px solid var(--rule);border-radius:var(--r-pill);padding:var(--s1) var(--s4) var(--s1) var(--s1)}
+.channel span{width:28px;height:28px;border-radius:50%;background:var(--orange)}
+
+/* photo gallery: ruled cells like the card grid */
+.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule);margin-top:var(--s12)}
+.gallery.strip{grid-template-columns:2fr 1fr 1fr}
+.gallery figure{margin:0;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:var(--s6);display:flex;flex-direction:column;gap:var(--s3);min-width:0}
+.gallery:not(.strip) figure.wide{grid-column:span 2}
+.gallery .photo{border-radius:var(--r-media);border:1px solid var(--rule);overflow:hidden;aspect-ratio:3/4}
+.gallery figure.wide .photo{aspect-ratio:auto;height:100%;min-height:0}
+.gallery.strip .photo{aspect-ratio:auto;height:clamp(220px,28vw,360px)}
+.gallery .photo img{width:100%;height:100%;object-fit:cover}
+.gallery figcaption{font-family:var(--grotesk);font-size:13px;font-weight:500;color:var(--ink-muted)}
+
+/* photos are printed in ink onto a brand colour (duotone), so they read as part of the palette */
+img.duo{filter:grayscale(1) contrast(1.25) brightness(1.08);mix-blend-mode:multiply;transition:filter .4s ease,mix-blend-mode .4s}
+.card:hover img.duo,.gallery figure:hover img.duo{filter:grayscale(.15) contrast(1.05);mix-blend-mode:normal}
+.media img.duo + .numeral{color:#f7f3ec}
+
+/* footer */
+.foot .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--s6);padding-block:var(--s12) var(--s16);border-top:1px solid var(--rule)}
+.foot .lbl{font-family:var(--grotesk);font-size:13px;font-weight:500;color:var(--ink-muted);display:block;margin-bottom:var(--s1)}
+
+@media (max-width:760px){
+  .about{grid-template-columns:1fr}
+  .pager{grid-template-columns:1fr}
+  .pager .next{text-align:left}
+  .card,.block{padding:var(--s6)}
+  .tab{min-width:0}
+  .intro{text-align:left}
+  .gallery,.gallery.strip{grid-template-columns:1fr 1fr}
+  .gallery.strip figure:first-child,.gallery:not(.strip) figure.wide{grid-column:1/-1}
+  .gallery figure{padding:var(--s3)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="wrap">
+  <a class="mark" href="#home">HG</a>
+  <nav class="nav" id="nav" aria-label="Main"></nav>
+</div></header>
+<main id="app"></main>
+<footer class="foot"><div class="wrap" id="foot"></div></footer>
+
+<script>
+/* ============================================================
+   CONTENT — edit this section to update the blog.
+   ============================================================
+   EMBED_MODE: "embed" plays YouTube and interactive sites on the page (your own host).
+               "link" shows cards that open them in a new tab (the Claude-hosted page).
+   Photos: a file path or URL, e.g. "images/about.jpg". Empty = a brand-colour block.
+   Posts: one object per post. "subject" groups posts; a second subject adds a filter.
+   colour: "orange" | "green" | "cyan" | "night" — the card's block colour.
+   ============================================================ */
+const EMBED_MODE = "embed";
+
+const SITE = {
+  name: "Hendrix George",
+  tagline: "Digital Portfolio",
+  channelUrl: "",              // your YouTube channel link
+  channelName: "YouTube channel",
+  email: ""                    // shown in the footer if filled in
+};
+
+const PHOTOS = {
+  about: "images/portrait.jpg"  // portrait (About page)
+};
+
+/* Photo strip on Home and the gallery on About. "wide" photos take two columns. */
+const GALLERY = [
+  { src:"images/jazz-trio.jpg", alt:"Hendrix playing archtop guitar and singing with a jazz trio", caption:"Jazz trio", wide:true, colour:"orange" },
+  { src:"images/pedals.jpg", alt:"Hendrix crouched over a pedalboard on stage", caption:"Live", colour:"cyan" },
+  { src:"images/practice.jpg", alt:"Hendrix tuning an archtop guitar", caption:"Practice", colour:"green" },
+  { src:"images/studio.jpg", alt:"Two students working at a recording studio desk", caption:"In the studio", wide:true, colour:"cyan" }
+];
+
+const ABOUT = [
+  "Over the past four years, I’ve dedicated my professional life to music education. This has included a range of environments, including one-on-one studio teaching of guitar and music production, my role as head of Orchestra at Marist Sisters Woolwich, and full-time study at the Sydney Conservatorium of Music.",
+  "This is furthered through my extracurricular learning, regularly attending professional development opportunities including the obboda conducting course level one, Music in me summits, Orff NSW level one, regular book reviews, Orchestra composition and curriculum design for music production."
+];
+const ABOUT_TAGS = ["Guitar", "Music production", "Orchestra", "Conducting", "Orff", "Curriculum design"];
+
+const POSTS = [
+  { id:"week-1", week:1, subject:"Technology in Music Education", title:"Enactive Philosophy", status:"published", colour:"orange", image:"",
+    tags:["Philosophy","Musicking","Enactivism"],
+    body:[
+      "Philosophy within education has always been a major component, particularly in relation to political capital. However, philosophy can also shape the processes through which we understand learning and teaching. An example of this came in Week One of Technology in Music Education, where we sought to define key terms to better engage with the topic in future classes. From our discussion, we came across several key concepts: music, for example, through Christopher Small's definition of musicking, where participation in the processes and relationships surrounding music becomes central to what music is. (Small, 1998) We also considered technology as the utilisation of knowledge to further capability and efficiency within a particular societal context. Through these two sets of meanings, we can use an enactivist philosophy to understand ourselves as organisms engaging within a musical context, or “musicking”, with our cognition being shaped and extended through our interaction with technological tools. (van der Schyff et al., 2022)",
+      "And philosophically, you, the reader, may ask, “Why does this even matter?” My answer lies in this: as technology shapes and extends the ways in which we process music, we as educators must view technology in music education as we would an instrument or a form of notation, a tool through which we can engage with and process music at a deeper level. As technology increasingly becomes integrated into human cognition and interaction, curriculum should follow, preparing students for a uniquely digital world."
+    ], media:[] },
+  { id:"week-2", week:2, subject:"Technology in Music Education", title:"Microphones and Podcasting", status:"published", colour:"cyan", image:"images/studio.jpg",
+    tags:["Microphones","Podcasting","Interactive"],
+    body:[],
+    media:[
+      { type:"web", label:"The Mic Console", hint:"Interactive microphone guide", local:"tools/mic-console.html", url:"https://codepen.io/editor/HennyG3/pen/01a033ab-05b7-73dc-942b-d137077ae7dc", embed:"https://codepen.io/HennyG3/embed/01a033ab-05b7-73dc-942b-d137077ae7dc?default-tab=result" },
+      { type:"youtube", label:"YouTube Video", id:"DilmFaOiO34" }
+    ] },
+  { id:"week-3", week:3, subject:"Technology in Music Education", title:"Video and Lighting", status:"published", colour:"night", image:"",
+    tags:["Video","Lighting","Interactive"], body:[],
+    media:[
+      { type:"web", label:"Lighting Lab", hint:"Colour temperature and three-point lighting", local:"tools/lighting-lab.html" },
+      { type:"youtube", label:"YouTube Video", id:"qd8s0DWydgg" }
+    ] },
+  { id:"week-4", week:4, subject:"Technology in Music Education", title:"Notation Software", status:"published", colour:"green", image:"",
+    tags:["Notation","Software","Orchestra"],
+    body:[
+      "One way I already use notation software is writing simple compositions for the orchestra I lead. They give students a low barrier to entry, so they can make decent-sounding ensemble music and keep the experience as positive as possible. Three of these sight-reading pieces are attached below, each with a full score and parts.",
+      "Further down, in my video, I talk through my thoughts on notation software's place in the music classroom."
+    ],
+    media:[
+      { type:"youtube", label:"YouTube Video", id:"jt6XAOgOA6k" },
+      { type:"scores", label:"Sight-reading pieces for band", hint:"Full scores and parts (PDF)", items:[
+        { title:"Sight Reading 1 of 5", sub:"For band · Marist Sisters Woolwich", pages:16, pdf:"scores/sight-reading-1.pdf", img:"images/score-sight-reading-1.jpg" },
+        { title:"Navua Boat Shed", sub:"Sight Reading 2 of 5 · For band", pages:18, pdf:"scores/sight-reading-2-navua-boat-shed.pdf", img:"images/score-sight-reading-2-navua-boat-shed.jpg" },
+        { title:"Sight Reading 5 of 5", sub:"For Marist Sisters Woolwich", pages:21, pdf:"scores/sight-reading-5.pdf", img:"images/score-sight-reading-5.jpg" }
+      ]}
+    ] },
+  { id:"week-5", week:5, subject:"Technology in Music Education", title:"Video Colour Grading and Interactivity", status:"draft", colour:"night", image:"",
+    tags:["Video","Colour grading"], body:[], media:[] },
+  { id:"week-6", week:6, subject:"Technology in Music Education", title:"Teaching Through LMS", status:"published", colour:"cyan", image:"",
+    tags:["LMS","Online learning","Book review"], body:[], media:[ { type:"youtube", label:"YouTube Video", id:"YAfoefJjZ_I" }, { type:"reading", id:"review-hooked" } ] },
+  { id:"week-7", week:7, subject:"Technology in Music Education", title:"Synthesisers", status:"published", colour:"orange", image:"",
+    tags:["Synthesis","DSP","Hardware"],
+    body:[
+      "Today in class we focused on synthesisers as an avenue for learning. I have a particular interest in polyphonic digital synthesisers, as they are cost-effective and have much wider capabilities. As someone who rocks a Helix multi-effects unit, I also believe DSP (digital signal processing) sounds about 99% as good as analog gear. So I decided to understand how DSP units work, by simplifying guides written, ironically, by analog.com (Analog Devices, n.d.).",
+      "At their foundation, DSPs are microcomputers whose software and hardware are designed to process audio. A DSP has four key components: program memory, data memory, a compute engine, and input/output systems. Program memory stores the programs used to process the data, while data memory is where the audio itself is stored. Inputs and outputs connect the calculations to the real world. Finally, the compute engine is where the programs and data are processed mathematically.",
+      "Interestingly, there is a crossover with my readings on tokenisation, in which a uniquely human way of communicating is converted into something digital that can be calculated. Here this is called analog-to-digital conversion (ADC): sound waves are captured, then a hardware chip measures the electrical signal's amplitude at very high speed. This is measured in two ways: the sample rate, in kHz, which is the number of samples per second, and the bit depth, which is how precisely each sample is measured.",
+      "Compute engines are the core of these systems, as they do the maths required to shape the sound. These chips are uniquely powerful in the speed of their arithmetic operations, memory handling, instruction sets and parallelism."
+    ], media:[] },
+  { id:"week-8", week:8, subject:"Technology in Music Education", title:"AI in Music Education", status:"published", colour:"green", image:"",
+    tags:["AI","Book review"], body:[], media:[ { type:"reading", id:"review-llms" } ] },
+  { id:"week-9", week:9, subject:"Technology in Music Education", title:"Beats", status:"published", colour:"orange", image:"images/ableton-move.jpg",
+    tags:["Beatmaking","Drum machine","Final project"],
+    body:[
+      "Today, I did a complete 180 on my final project. After about 20 hours dedicated towards my LMS Mode of the Day, I’ve decided to do something harder. I’m going to make my own drum machine.",
+      "“But why?” a reasonable person might ask. The reason is my larger theory: complex user interfaces are developed without consideration of skill acquisition, increasing barriers for music makers. With the development of LLM reasoning and coding capabilities, this paradigm has the opportunity to shift. I want to reprogram a drum pad similar to the one used in today’s class, in a way that gives me the most capability and usability. That being said, today’s Ableton portable drum machine was quite simple to use, but it could be more efficient!"
+    ],
+    media:[ { type:"soon", label:"Drum machine", hint:"Interactive website coming soon" } ] },
+  { id:"week-11", week:11, subject:"Technology in Music Education", title:"Mashups, Chopping and More", status:"published", colour:"cyan", image:"",
+    tags:["Sampling","Mashup","Ableton"],
+    body:[
+      "Sampling music has been a part of mainstream musical culture for a few decades now. Today we discussed and played with the sampling software found in Ableton Lite. This exercise was interesting, as I struggled to use this technology; in fact, I believe about 75% of my music creation was dedicated to understanding the interface.",
+      "This, I believe, shows the limitations of these DAWs and why viewing them as an instrument is crucial for educators using them. They are an investment in a classroom: time some teachers don’t have within their program. This once again underpins my belief that user interfaces for education are in a new era, in which teachers have control of the class. To demonstrate this, below is another artefact generated by Claude, in which people can load sounds and chop their samples using keys 1–9."
+    ],
+    media:[ { type:"soon", label:"Sample Chopper", hint:"Load a sound and chop it with keys 1–9" } ] },
+
+  /* ---- KIME: Key Ideas in Music Education ----
+     Short write-ups of each weekly reflection; the full reflection lives on the e-portfolio (the "source" link). */
+  { id:"kime-1", week:1, subject:"KIME", title:"The Beginning", status:"published", colour:"green", image:"",
+    tags:["Aural vocal approach","Singing"],
+    body:[
+      "KIME (Key Ideas in Music Education) looks at ways of teaching music to students of every age, language and culture. Our first lesson introduced the aural vocal approach: a multi-modal method that combines singing rhythms, hand movements, imitation and repetition, building gradually towards more complex material.",
+      "The teacher sang songs in one melody with small adjustments each time. I noticed how this minimal approach helps students reach a flow-like state, because it removes the need to overthink."
+    ],
+    media:[ { type:"youtube", label:"YouTube Video", id:"81uJZIF9TCs" }, { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-one" } ] },
+  { id:"kime-2", week:2, subject:"KIME", title:"Richard Gill", status:"published", colour:"cyan", image:"",
+    tags:["Aural vocal approach","Modelling"],
+    body:[
+      "This week I watched Richard Gill teach a kindergarten class. I was impressed by his memory for names, his fairness, and the way he combines percussion, singing, movement and analysis in one lesson.",
+      "The highlights for me were the opening copy task, the tambourine-based aural analysis, and a walking exercise that lets students with different musical strengths all take part. His habit of breaking songs and melodies into small chunks is excellent, and so is his modelling of tasks, his encouragement, and his calm handling of distractions."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-two" } ] },
+  { id:"kime-3", week:3, subject:"KIME", title:"Assessment and Musical Readiness", status:"published", colour:"orange", image:"",
+    tags:["Musical readiness","Praxial music education"],
+    body:[
+      "Musical readiness is a student's developing ability to be musical: coordination, aural awareness and vocal ability. Music education can happen at any age.",
+      "We also looked at praxial music education, which treats music as something learned by doing and embodying it, built on values like community, creativity, equality and self-expression. The week finished with an assessment task."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-three" } ] },
+  { id:"kime-4", week:4, subject:"KIME", title:"Simple Techniques", status:"published", colour:"night", image:"",
+    tags:["Solfège","Body percussion","Analysis"],
+    body:[
+      "This lesson built musical readiness through solfège, body percussion, improvisation and musical analysis. Some intervals, like the minor third, are much easier for children to learn, and adding new notes to a scale gradually supports both classroom routines and aural skills.",
+      "We also worked with Jessica Wells' Zodiac Animalia, linked to the Personal and Social Capability and Intercultural Understanding general capabilities and the Asia and Australia's Engagement with Asia priority. My takeaway: a structured analysis task built on clear contrasts helps students interpret music without feeling overwhelmed."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-four" } ] },
+  { id:"kime-5", week:5, subject:"KIME", title:"The Three R's and Older Beginners", status:"published", colour:"green", image:"",
+    tags:["Older beginners","Lesson planning"],
+    body:[
+      "The aural vocal approach lets older beginners move faster and handle more complex material than children, thanks to longer attention spans, less inhibition and more life experience.",
+      "A musical focus is the central intention of a lesson. Karla's five-part lesson plan gives it a shape: a behavioural objective, a review of prior knowledge, the reason for the new learning, reinforcement practice, and a wrap-up. Older learners respond well to structured, segmented content delivered at a brisk pace."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-five" } ] },
+  { id:"kime-6", week:6, subject:"KIME", title:"Musical Multi-Literacy", status:"published", colour:"cyan", image:"",
+    tags:["Literacy","Culture"],
+    body:[
+      "Music literacy is the ability to read, write, interpret and communicate musical ideas, through notation, chord charts and other systems across cultures. It takes time to build, but it gives students strong musical readiness.",
+      "Multi-literacy means developing several ways of communicating music so you can adapt. As teachers, we need to recognise our own musical background and avoid staying inside a Western art music framework."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-six" } ] },
+  { id:"kime-7", week:7, subject:"KIME", title:"Ta and Ti-Ti", status:"published", colour:"orange", image:"",
+    tags:["Rhythm","Learning psychology"],
+    body:[
+      "Separating beat from rhythm is one of the biggest challenges for beginning musicians. We discussed it alongside an analysis of a multi-lesson unit plan.",
+      "I linked this to my Psychology of Learning and Instruction course: schema theory, and building on frameworks students already have, helps them encode new information. Combining phonological and visuospatial information improves retention, because it engages different parts of working memory."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-seven" } ] },
+  { id:"kime-8", week:8, subject:"KIME", title:"Behaviour Management in Music Education", status:"published", colour:"night", image:"",
+    tags:["Behaviour management","Relationships"],
+    body:[
+      "An observation at Fort Street Public School, together with my psychology coursework, pushed me to research behaviour management further. Students should feel safe, included, and that they have the ability to learn, and that comes from behaviour management and relationship building.",
+      "Engagement, retention and joy should come from within the classroom. I put together nine strategies, including clear expectations, a three-voice approach, directed praise and possibly token economies. Putting them into practice is the harder part."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-eight" } ] },
+  { id:"kime-9", week:9, subject:"KIME", title:"Choosing a Song and Writing Parts", status:"published", colour:"green", image:"",
+    tags:["Arranging","Pentatonic"],
+    body:[
+      "I asked my dad, a music teacher, for song suggestions and chose a simple pentatonic song he used to sing to me as a child. The melody suited a I–V progression, which made harmonising it straightforward.",
+      "I then built a body percussion pattern mixing ta and ti-ti rhythms, which balances simplicity with rhythmic interest."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-nine" } ] },
+  { id:"kime-10", week:10, subject:"KIME", title:"Writing and Practising", status:"published", colour:"cyan", image:"",
+    tags:["Rehearsal","Teaching a song"],
+    body:[
+      "I wrote and practised the piece with friends, family and on my own, thinking about its energy, phrasing, endings and how I would teach it. Its two main phrases differ only in the final section, so it's easy to learn by singing it as a whole. The main challenge is coordinating the parts.",
+      "My aim is to have fun, not overthink it, and follow the Three R's structure clearly, even though I'm not sure yet how the teaching will go."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-ten" } ] },
+  { id:"kime-11", week:11, subject:"KIME", title:"Review of Assessment", status:"published", colour:"orange", image:"",
+    tags:["Assessment","Reflection"],
+    body:[
+      "I think the assessment went well, though I lost my place in the script at times and needed stronger awareness of the parts. The third harmony line (so–fa) was hard, because I hadn't practised it enough and it sits outside the pentatonic scale.",
+      "Two hours of singing was tiring, which showed me that fitness and pacing matter for music teachers. Overall I came away excited and inspired about becoming a music teacher."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-eleven" } ] },
+  { id:"kime-12", week:12, subject:"KIME", title:"Curriculum", status:"published", colour:"night", image:"",
+    tags:["Curriculum","Literacy","Numeracy"],
+    body:[
+      "I looked through the Australian Curriculum to see where music fits, and how it shapes my own education and society more broadly, with a focus on literacy and numeracy.",
+      "I asked ChatGPT how music education supports literacy and numeracy, but its answer lacked depth, especially on metacognition and working memory. Explaining music's role in these core areas needs a more psychologically grounded understanding."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-twelve" } ] },
+  { id:"kime-13", week:13, subject:"KIME", title:"Improvisation with an Aural Approach", status:"published", colour:"green", image:"",
+    tags:["Improvisation","Jazz"],
+    body:[
+      "This week we improvised over a graph using an aural, vocal approach. I connected it to teaching jazz, which I study as a minor, and to Chad West's research on jazz education, which lines up with the aural approach: sound before symbol, echoing, chunking and collaboration.",
+      "Small collaborative ensembles with an aural focus are among the best ways to develop improvisation, and self-assessment matters too."
+    ],
+    media:[ { type:"source", url:"https://sites.google.com/view/hendrix-student-portfolio/weekly-reflections-kime/week-thirteen" } ] }
+];
+
+/* Readings: longer pieces (book reviews, essays) that open on their own page.
+   Link one from a post with { type:"reading", id:"<key>" } in that post's media. */
+const READINGS = {
+  "review-llms": {
+    kicker: "Book review",
+    title: "How Large Language Models Work",
+    author: "Edward Raff, Drew Farris and Stella Biderman",
+    from: "week-8",
+    colour: "green",
+    image: "",
+    summary: "Tokens, embeddings, attention and training: what actually happens inside an LLM, read by a music teacher in training.",
+    preface: "Anthropomorphic language about these systems is marked with quotation marks. These words usually refer to algorithmic calculations of inference. I've done this to highlight the difference between human cognition and systems of calculation, while keeping the writing readable.",
+    sections: [
+      { h: "Introduction", blocks: [
+        { p: "Over the past five years, artificial intelligence has become an increasingly powerful technology with great implications for society as a whole. Despite this, knowledge of these systems across many discourses is quite low. How Large Language Models Work, by Edward Raff, Drew Farris and Stella Biderman, explains large language models (LLMs) at a foundational level (Raff et al., 2025)." },
+        { p: "Despite being foundational, the book was incredibly complex and challenging to understand, which made critical engagement with the content difficult. This review could therefore be read more as a summary through my perspective. The following sections discuss tokenisation, transformer neural networks, training, and wider uses of machine learning. A larger claim of the book is that LLM technology is not abnormal in its development. I, however, view this technology as uniquely powerful and transformative for many sectors of society." }
+      ]},
+      { h: "Tokenisation", blocks: [
+        { p: "At its foundation, machine learning is the process of finding trends in data through algorithmic processing. So to understand how large language models work, we must understand how these machines “understand” the data of language. Computers don't understand language as humans do. Instead, they convert language into numbers called tokens. In programming terms, words are stored as strings and whole numbers as integers, and the process of converting strings into integers is called tokenisation. It has four steps:" },
+        { ol: [
+          "Receiving the text data to process",
+          "Converting the text into string data",
+          "Breaking the string into tokens",
+          "Mapping each token to a unique identifier"
+        ]},
+        { p: "Steps 2 and 3 commonly involve human intervention, and LLM designers vary their tokenisation process depending on the model's purpose." },
+        { p: "A common method is byte pair encoding, which builds a vocabulary from the most common combinations of characters. It starts with single letters, then merges frequent pairs into larger pieces until it has whole words. For example, the word “apple” would be a single token, whereas “antidisestablishmentarianism” would be split into many smaller pieces. Vocabulary size is critical: a larger vocabulary needs more memory, but generally makes the system better. Capitalisation shows the trade-off. Treating capital letters separately roughly doubles the number of possible pieces, yet a phrase written in all capitals carries a different context. In the final step, each token is given a unique identifier, an integer, and the full set of these is the LLM's vocabulary." },
+        { p: "Exploring these processes also shows their limitations. Most LLMs are trained mostly on English, so other languages can require significantly more compute and produce less sophisticated responses. Another problem is word puzzles and trick questions. This was clearer in earlier models: when a well-known riddle such as “the doctor is the boy's mother” was reworded so the classic answer no longer fitted, models often still gave the popular answer." }
+      ]},
+      { h: "Transformers: how outputs become inputs", blocks: [
+        { p: "In 2017, Google researchers released a landmark machine learning paper, “Attention Is All You Need” (Vaswani et al., 2017). This single paper, combined with NVIDIA's graphics processing units, created the AI boom we are in today. But how? How did one paper carve the path from prediction algorithms to tackling problems as hard as the Navier–Stokes equations? These are the questions the book explores through the transformer." },
+        { p: "Transformer models, much like autocorrect, predict tokens, and they come in three types. Encoder-only models create representations of knowledge used to perform tasks. Decoder-only models generate text: they take a partially written document and finish it. Encoder–decoder models take an entire passage of text and generate a corresponding text in response. Most LLMs are decoder-only, including Generative Pre-trained Transformers (GPTs) like ChatGPT and Claude. The following paragraphs explain the four parts of the transformer process (embedding, attention, outputs and un-embedding) alongside the limitations of LLMs and their use cases." },
+        { p: "After tokenisation, an LLM has only words that are void of meaning. Embedding is the process of creating “meaning”, allowing models to draw connections between “king” and “queen” and distinctions between tomatoes and Baroque music. An embedding is a list of numbers called a vector, positioned in many dimensions to map semantic “meaning”. This is easiest to picture in three dimensions. A common example is that male and female versions of similar words sit the same distance apart across many roles, as Figure 1.1 shows. Real models use far more dimensions than three: the largest version of GPT-3, for example, used 12,288." },
+        { fig: { src: "images/llm-embeddings.jpg", num: "Figure 1.1", title: "Simplified word embedding relationships", note: "Image generated using ChatGPT (OpenAI, 2026), illustrating Mum–Dad and Queen–King relationships on three-dimensional axes." } },
+        { p: "Now that an LLM has semantic relationships between words, it must “understand” a series of words. Until now these tokens all hold equal weight, and this is where the transformer and its attention mechanism come in. Transformers process sequences of data using self-attention, in which every previous token is statistically weighted for importance. This is where the term “context window” comes from. Self-attention has three key components: the query (what the model is looking for), the key (vectors representing possible matches for the query) and the value (the information passed on when a query and key match). Mathematically, it looks like this:" },
+        { eq: "Attention(Q, K, V) = softmax( QKᵀ / √dₖ ) V" },
+        { p: "As a music teacher in training who dropped maths in Year 10, I won't try to explain what this means, but it's very pretty to look at. I find it powerful to see an equation that changed the future of society." },
+        { p: "From this model of “understanding” the order of tokens, we can see how modern LLMs produce text through sampling: the algorithm that chooses the next word from the likely candidates in context. There are two steps. First, after the transformer layers, the model calculates the probability of each possible next token. Second, it randomly selects a token based on those probabilities. This randomness may seem bizarre at first, but if the model always chose the most likely word, it would just repeat exact examples from its training data. The level of randomness can also be adjusted. This is called temperature, and it's usually set according to the model's use." }
+      ]},
+      { h: "Training", blocks: [
+        { p: "Machines don't “learn” the way humans do. Instead, they repeat simple functions billions of times. Two processes drive this: the loss function, which calculates how bad the model is, and gradient descent, the mechanical process that tweaks the numbers in the model to make the loss as small as possible." },
+        { p: "A good loss function has three core qualities: it is specific to and correlated with the result we want, it can be computed with reasonable time and data, and it is smooth, so its outputs don't fluctuate wildly. The loss function must know the answer to its question and be able to score how accurate the model's response is. From this score, gradient descent can adjust the model in different ways to reduce the loss." },
+        { p: "This process has a core problem of “laziness”: a small step may reduce the loss while a larger step would temporarily increase it, so the model can get stuck. Figure 2.1 shows this as a hypothetical ball-rolling game, where the ball is stuck in a local minimum and needs momentum to reach the global minimum. Optimisers that add momentum, such as Adam (adaptive moment estimation), partly fix this, but even they are limited by the direction of their momentum." },
+        { fig: { src: "images/llm-gradient-descent.jpg", num: "Figure 2.1", title: "Gradient descent and momentum", note: "Image generated using ChatGPT (OpenAI, 2026), illustrating a ball trapped at a local minimum and momentum carrying it toward a global minimum." } },
+        { p: "LLMs are trained to predict tokens across huge datasets. Given “Why did the chicken cross the road? To get to the other …”, the model keeps searching its data for common responses to find the right answer: “side”. This creates a classic alignment problem, because most training data is online content, which is often unreliable and can carry antisocial traits such as racism. It also means that questions built on false assumptions can confuse models. Asked “Why is spaghetti the strongest material?”, a model like GPT-3 would answer seriously. This shows once again how different our cognition is from artificial intelligence, and how hollow its process of creating responses can be." },
+        { p: "Because of these limits, companies steer their models towards desirable responses in four ways: curating the training data, altering how the LLM is trained, fine-tuning the LLM on another dataset, and writing extra code afterwards to control its outputs. To keep this short, I'll focus on fine-tuning." },
+        { p: "Fine-tuning trains a model further on a smaller, more specific dataset, often using human feedback. This often involves reinforcement learning, a set of techniques that improve a model through trial and error. It is similar to training with a loss function, but it doesn't rely on a strict loss function with known answers. Reinforcement learning has four parts: the agent, a system with an overarching goal; the action, what the agent does to reach that goal; the environment, the place where actions happen and change things; and the reward, a number that quantifies improvement." }
+      ]},
+      { h: "Wider uses and concluding thoughts", blocks: [
+        { p: "Increasingly, AI and machine learning are creating capabilities in domains beyond text generation, including images, music, code, 3D modelling and maths. These domains share very similar training processes, using gradient descent and transformer models, but differ in how they tokenise and encode information. For example, image models don't use text tokens but patches: small groups of pixels that together make up an image. Attention then maps how these patches relate, so the whole image is “understood”." },
+        { p: "This is interesting, but the approach lends itself most obviously to coding and maths, which share a unique quality: verifiability. Each line of code or maths can be checked independently, so these systems can check their own answers during training, much like fine-tuning, and become more efficient." },
+        { p: "Interestingly, the book stays optimistic about these systems. It implies that while job displacement may occur, existential threats from recursively self-improving AI are unlikely. This mostly comes from the idea that while these models are incredibly efficient, they are not smart: they can't “create” new domains of knowledge, only draw inferences between existing sets of knowledge. I believe a lot of the hype around these systems is warranted. People like me have done things that would have taken years before, and these systems have changed, and will keep changing, the world as we know it." },
+        { p: "This is one of the first book reviews where I'm close to certain I'll be wrong about something. It was the biggest stretch in my reading I've ever done, often requiring me to step away, go back to the beginning of chapters, and ask chatbots whether I was getting it right. But it was a lot of fun. It was a good book for me to read, though for what it set out to be, it could have been simpler. I know it can't have been easy simplifying so much knowledge, but this was very challenging for any reader." },
+        { p: "I'm excited to read more about this topic. The book taught me heaps and helped me see what everyday terms like tokens, context and parameters actually mean. It's also funny hearing others talk about AI without foundational knowledge of how these systems work! I'll admit once again that these systems are complicated, and computer science is complex, brain-melting and really interesting." }
+      ]}
+    ]
+  },
+  "review-hooked": {
+    kicker: "Book review",
+    title: "Hooked: How to Build Habit-Forming Products",
+    author: "Nir Eyal",
+    from: "week-6",
+    colour: "cyan",
+    image: "",
+    summary: "Eyal's four-step habit cycle — triggers, actions, variable rewards and investment — and what it means for educational design.",
+    sections: [
+      { h: "Introduction", p: [
+        "Hooked by Nir Eyal (2014) is a guide to creating habit-forming products. It is written mostly for software designers, but it has tremendous value for consumers and for anyone interested in human psychology. The core argument is that habit-forming products are built on a four-step cycle: triggers, actions, variable rewards and investment. The book discusses each of these steps alongside foundational material such as implementation, examples and ethical concerns.",
+        "I fundamentally agree with the premises of the core thesis. However, I believe its treatment of ethical concerns, particularly around machine learning in targeted entertainment, does not go far enough. This review presents the book's core concepts and then each of the four steps of the habit-building process, engaging with the content in each section."
+      ]},
+      { h: "Core concepts", p: [
+        "Eyal discusses the behavioural scripts that everyone follows, through which most tasks are automated as sets of learned routines. The literature on dual process theory and procedural memory gives this a strong theoretical grounding, and I agree with their presence. Habit-forming product designers, however, see this as a process through which they can influence consumers. The book suggests that if a product can become part of our behavioural scripts, user retention could increase dramatically, leading to profitability over time.",
+        "The core claim is that habits aren't created from nothing, but tied to the internal cues and scripts we act on every single day. This is a claim I agree with. The book gives examples of the strength of habits, such as the QWERTY keyboard surviving despite more efficient layouts being created, or two-thirds of alcoholics returning to drinking after rehab. These are shocking statistics and explanations of the modern world, ranging from why negative behaviours keep recurring to why inefficient products are still the default for much of society.",
+        "Eyal presents a product's “hook-ability” on two axes: frequency and utility. Frequency describes how often an internal or external cue occurs, while utility describes the positive relationship the product creates through use. Products that are both high-frequency and high-utility have a high chance of forming habits in users, and the inverse is also true. This model is quite simple, but it is the foundation of the book's overarching process, in which designers aim to improve the usefulness of a product within a specific moment or cue. The later chapters describe how to increase a product's hook-ability by raising its frequency and utility."
+      ]},
+      { h: "Triggers", p: [
+        "As described above, behavioural scripts are sets of intuitive procedures that we follow. When driving to work, a person typically takes the same route every day, because the external environment cues each turn. The book identifies two kinds of cues: external and internal. External cues are like doorbells: the physical environment prompts an action. Internal cues arise from feelings that prompt an action, such as feeling bored and asking a friend to go out.",
+        "The interesting claim in the text is that design for habit-building needs both, with external cues slowly transforming into internal ones. The book presents four types of external trigger (Figure 1.1) that a designer can use to engage users, each with positive and negative aspects for implementation."
+      ], table: {
+        caption: "Figure 1.1",
+        title: "Types of external trigger",
+        note: "Table created by Hendrix George, summarising the four types of external trigger described in Eyal (2014).",
+        rows: [
+          ["Paid", "The product pays the user in real currency."],
+          ["Earned", "The user earns something from the experience, such as fun or knowledge."],
+          ["Relationship", "Another person recommends the product."],
+          ["Owned", "The consumer adopts the product and it becomes an ‘asset’ of theirs."]
+        ]
+      }, after: [
+        "The book suggests these as useful ways to get consumers to start using a product. However, for a product to be used often, it must have an internal trigger. Internal triggers are not created but attached to. For example, people don't use Google because of notifications; they use it because of the internal cue of wanting to know something quickly. The book goes a step further, arguing that the most effective internal cues are those that relieve uncomfortable feelings. This is intuitively correct, but I would need more evidence to be fully convinced.",
+        "Eyal then suggests a narration strategy for identifying the internal triggers behind a product, in which you keep asking why an action is taking place. For example, an Instagram user takes photos of their everyday life. Why? Because they want to show their friends their life. Why? Because they want to show off. Why? Because they want recognition from their peers. Why? Because they want to be accepted by their social groups. We have now identified one of Instagram's internal triggers: the desire to feel accepted by social groups, a feeling that was always present in the individual.",
+        "I found this an interesting exercise, partly because it reveals the internal cues in my own life, and partly because it shows that designers often create products without fully understanding why people use them. In short, through triggers a product can attach itself to a need, and successful products integrate both external and internal cues that draw consumers into the later stages of the habit-forming cycle."
+      ]},
+      { h: "Actions", p: [
+        "The next step of the cycle is the action a consumer takes. To understand the model we must separate cues from actions: a cue is the desire to do something, while the action is what the person does as a result. The chapter's key message is that consumers must intuitively connect their cue to an action involving your product.",
+        "The book identifies three factors that drive actions: motivation, ability and triggers. Motivational theories are complicated and, in my reading, surprisingly inconclusive. The book draws mostly on self-determination theory, in which motivation comes from autonomy, competence and relatedness. The theory has strong empirical support, but in my reading it is too conceptual for practical application (though I haven't read the original book). Building on this, the book names three motivators a designer can work with: avoiding pain, fear and rejection, and uses advertising as an example, examining how different ads fit the model. I personally found this section too conceptual and short on practical advice.",
+        "Ease of use is a core part of strengthening the link between a cue and an action. By removing obstacles such as monetary cost, physical and mental effort, and time, we increase the likelihood that a person acts on a cue by using the product. For example, most apps don't make you log in every time you open them, because that would add friction. This is intuitively correct on basic reflection. It suggests that one of the most fundamental things a designer can do to increase use is to reduce friction. By strengthening consumers' motivation while removing barriers, designers help users connect their triggers to actions involving the product."
+      ]},
+      { h: "Variable rewards", p: [
+        "Returning to the hook-ability model from the start, the frequency axis has now been covered by cues and the actions taken. The next two stages of the cycle improve the second axis: utility. For a product to be used consistently, it must generate a feeling of reward before the action. Careful readers may wonder about the word “before”. Surely a successful product would simply deliver a reward? Eyal clarifies that hook-forming products use variable rewards, not just rewards.",
+        "Dopamine is an extremely powerful driver of action. The book illustrates this with an experiment in which rats had access to a lever that stimulated the reward centres of their brains. With this access, the rats ignored biological needs such as eating and sleeping to keep pressing the lever. Eyal draws a critical distinction about why this happened: the rats kept pressing not out of a want for dopamine, but to relieve the stress of not having it. The reward a hook-based product must create is relief from the discomfort of not acting.",
+        "For some reason, the most effective way to strengthen this in people is through “hunt-like” systems that reward only some of the time, in return for consistent effort. The book suggests this is a leftover from our hunter-gatherer past, when persistent effort meant survival and was passed on through evolution. An obvious example of variable reward is gambling: most often the house wins, but a win is always statistically possible. The longer consumers must keep hunting for the reward, the greater their investment of time.",
+        "This is where ethical questions appear. These dopamine-driven processes are undeniably strong motivators, and many contemporary issues could be viewed as exploitations of our evolved brains. Calorie-dense foods were once valuable to humans but now cause health problems; risk-taking behaviour that once served us in hunting now lowers quality of life. Coupled with machine learning algorithms, this is harmful and could worsen over time. The machine learning used by sites such as Instagram, Facebook and Twitter is not discussed in the book, which I believe is a serious limitation."
+      ]},
+      { h: "Investment", p: [
+        "The final step in the cycle is investment: encouraging consumers to put effort into the product so they have a reason to return. This is grounded in a psychological bias: we irrationally overvalue our own efforts. The book presents a study in which people who made their own origami valued it far more highly than identical pieces made by others. Some suggest this is why IKEA keeps selling products people must build themselves: they come to love their own creation. To me this is a fascinating psychological finding and a very useful lens for describing behaviour.",
+        "Investment is effort spent in anticipation of long-term rewards, like saving coins in a video game to buy an item. The core claim, however, is that investments are powerful because we develop preferences that rationalise our past behaviour. This model once again explains why old habits die hard. For example, Twitter (now X) is a relatively simple product: people post words, there's a feed to read them, and an algorithm to rank posts. There have been many clones trying to replace it, including Meta's Threads and Bluesky. Yet they struggle to replace it, because users have already invested in Twitter: their feed, their follower count and more. Showing people what they have worked towards is a powerful tool in creating hook-based products."
+      ]},
+      { h: "Conclusion", p: [
+        "This was a really good read, and I would recommend it to almost anyone. It offers a unique insight into human psychology, product design and the modern world, and it synthesises ideas well with remarkable clarity. I have slight criticisms of some implicit claims about addiction versus habit, but the book was published in 2014, so Eyal could hardly have foreseen the power of today's machine learning.",
+        "The book demystified a lot of software for me. In online discourse especially, addictive software is often seen as impossible to understand or beat, but this book provides a clear framework for doing both. There are definitely links to educational design that I will take from it, such as the learning process itself and removing the barriers to doing work."
+      ]}
+    ]
+  }
+};
+
+/* Videos not tied to one post (Videos page). */
+const EXTRA_VIDEOS = [ { label:"YouTube Video", id:"SHBVzhKTlDI" } ];
+
+const BIBLIOGRAPHY = [
+  "Analog Devices. (n.d.). <i>A beginner's guide to digital signal processing (DSP)</i>. https://www.analog.com/en/lp/001/beginners-guide-to-dsp.html",
+  "Eyal, N. (2014). <i>Hooked: How to build habit-forming products</i>. Portfolio.",
+  "OpenAI. (2026). <i>ChatGPT</i> [Large language model]. https://chatgpt.com",
+  "Raff, E., Farris, D., & Biderman, S. (2025). <i>How large language models work</i>. Manning Publications.",
+  "Small, C. (1998). <i>Musicking: The meanings of performing and listening</i>. Wesleyan University Press.",
+  "van der Schyff, D., Schiavio, A., & Elliott, D. J. (2022). <i>Musical bodies, musical minds: Enactive cognitive science and the meaning of human musicality</i>. MIT Press.",
+  "Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł., & Polosukhin, I. (2017). Attention is all you need. In <i>Advances in Neural Information Processing Systems</i> (Vol. 30). Curran Associates."
+];
+
+/* ============================================================
+   SITE CODE — no need to edit below.
+   ============================================================ */
+const $ = s => document.querySelector(s);
+function fitFrame(f){
+  const fit = () => { try { const h = f.contentDocument.documentElement.scrollHeight; if (h > 200) f.style.height = h + "px"; } catch(e) {} };
+  fit(); setTimeout(fit, 600);
+  try { new ResizeObserver(fit).observe(f.contentDocument.body); } catch(e) {}
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const WORDS = ["Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen"];
+const weekName = p => p.week != null ? "Week " + (WORDS[p.week] || p.week) : p.subject;
+const PAGES = [["home","Posts"],["videos","Videos"],["about","About"],["bibliography","Bibliography"]];
+const COLOURS = ["orange","cyan","green","night"];
+let homeTab = "posts", subject = "All";
+const latest = [...POSTS].reverse().find(p => p.status === "published");
+
+const PLAY = `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5l7.5 4.5-7.5 4.5z"/></svg>`;
+const OUT = `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 9L9 3M4.5 3H9v4.5" fill="none" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+/* pill-tag motif cut into a colour block — the design system's one shape */
+function motif(seed, col){
+  const rows = [[48,72,40],[64,48,80],[40,56]], r = seed % 3;
+  let x0 = 16, out = "";
+  rows.forEach((row,i)=>{ let x = x0 + ((i+r)%2)*24; row.forEach((w,j)=>{ const hot = (i===1 && j===(seed%row.length)); out += `<rect x="${x}" y="${56+i*24}" width="${w}" height="16" rx="8" fill="${hot?(col==="night"?"#ff3c00":"#0d1717"):"#f7f3ec"}" opacity="${hot?1:.9}"/>`; x += w + 8; }); });
+  return `<svg class="motif" viewBox="0 0 280 280" preserveAspectRatio="xMinYMin slice" aria-hidden="true">${out}</svg>`;
+}
+
+/* One drawing per week, built from the system's shapes (pills, discs, radius-media tiles) in brand colours.
+   Add a new key for a new post; posts without one fall back to the pill pattern. */
+const O="#ff3c00", G="#4de89a", C="#74edfc", N="#0d1717", P="#f7f3ec", D="#26333a";
+const ART = {
+  "week-1": `<circle cx="160" cy="96" r="58" fill="none" stroke="${N}" stroke-width="18"/><circle cx="214" cy="136" r="58" fill="none" stroke="${P}" stroke-width="18"/><circle cx="187" cy="116" r="10" fill="${N}"/>`,
+  "week-3": `<rect x="196" y="18" width="62" height="34" rx="10" fill="${O}"/><polygon points="206,52 248,52 270,250 120,250" fill="${C}" opacity=".9"/><ellipse cx="195" cy="250" rx="76" ry="14" fill="${P}"/><rect x="40" y="30" width="34" height="22" rx="8" fill="${G}"/><polygon points="44,52 70,52 120,170 40,170" fill="${G}" opacity=".35"/>`,
+  "week-4": `${[48,66,84,102,120].map(y=>`<rect x="18" y="${y}" width="244" height="4" rx="2" fill="${N}"/>`).join("")}${[[96,111,N],[152,84,O],[208,57,N]].map(([x,y,f])=>`<rect x="${x+10}" y="20" width="4" height="${y-20}" fill="${f}"/><ellipse cx="${x}" cy="${y}" rx="15" ry="10" fill="${f}" transform="rotate(-20 ${x} ${y})"/>`).join("")}<rect x="106" y="16" width="116" height="10" rx="3" fill="${N}"/>`,
+  "week-5": `<g style="mix-blend-mode:screen"><circle cx="150" cy="92" r="58" fill="${O}"/><circle cx="210" cy="92" r="58" fill="${G}"/><circle cx="180" cy="142" r="58" fill="${C}"/></g>`,
+  "week-6": `${[0,1,2].map(r=>[0,1,2].map(c=>{const f=[[N,P,P],[P,O,P],[P,P,N]][r][c];return `<rect x="${110+c*54}" y="${22+r*54}" width="46" height="46" rx="10" fill="${f}"/>`}).join("")).join("")}<rect x="22" y="22" width="78" height="16" rx="8" fill="${N}"/><rect x="22" y="46" width="56" height="16" rx="8" fill="${P}"/>`,
+  "week-7": `<path d="M18 70 L58 24 L58 116 L98 70 L138 24 L138 116 L178 70" fill="none" stroke="${N}" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>${[[222,62,C],[222,140,P]].map(([x,y,f])=>`<circle cx="${x}" cy="${y}" r="30" fill="${f}"/><rect x="${x-4}" y="${y-28}" width="8" height="24" rx="4" fill="${N}" transform="rotate(${x===222&&y===62?40:-50} ${x} ${y})"/>`).join("")}`,
+  "week-8": `${[[60,50,90,110],[90,110,160,60],[160,60,230,100],[90,110,170,150],[170,150,230,100],[160,60,170,150]].map(([a,b,c,d])=>`<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${N}" stroke-width="5"/>`).join("")}${[[60,50,N],[90,110,P],[160,60,N],[230,100,O],[170,150,P]].map(([x,y,f])=>`<circle cx="${x}" cy="${y}" r="${f===O?20:14}" fill="${f}"/>`).join("")}`,
+  "week-9": `${[0,1,2,3].map(r=>[0,1,2,3,4,5,6,7].map(c=>{const on=[[1,0,0,0,1,0,0,0],[0,0,1,0,0,0,1,0],[1,1,0,1,1,0,1,1],[0,0,0,1,0,0,1,0]][r][c];const f=on?[O,G,C,P][r]:D;return `<rect x="${24+c*30}" y="${24+r*30}" width="24" height="20" rx="10" fill="${f}"/>`}).join("")).join("")}`,
+  "week-11": `<path d="M150 40 a60 60 0 0 1 0 120 z" fill="${O}"/><path d="M196 70 a60 60 0 0 0 0 120 z" fill="${G}"/><rect x="40" y="40" width="70" height="16" rx="8" fill="${N}"/><rect x="40" y="64" width="46" height="16" rx="8" fill="${P}"/>`
+};
+function weekArt(p, i){
+  if (!ART[p.id]) return motif(p.week || i, p.colour);
+  return `<svg class="motif" viewBox="0 0 280 280" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><g transform="translate(0 30)">${ART[p.id]}</g></svg>`;
+}
+
+const markOf = p => p.week != null ? p.week : (p.mark || "·");
+
+function badgeFor(p){
+  if (p.status !== "published") return `<span class="badge paper">Coming soon</span>`;
+  if (p === latest) return `<span class="badge ${p.colour==="green"?"":"green"}">New</span>`;
+  return "";
+}
+
+function card(p, i){
+  const col = p.colour || COLOURS[i % 4];
+  const media = p.image
+    ? `<img class="duo" src="${esc(p.image)}" alt=""><span class="numeral">${markOf(p)}</span>`
+    : `${weekArt(p, i)}<span class="numeral">${markOf(p)}</span>`;
+  return `<a class="card" href="#${p.id}">
+    <div class="media bg-${col}">${media}${badgeFor(p)?`<span class="badge-wrap">${badgeFor(p).replace('class="badge','class="badge')}</span>`:""}</div>
+    <div class="head"><h3 class="title">${esc(p.title)}</h3><span class="figure">${esc(weekName(p))}</span></div>
+    <p class="meta">${esc(p.subject)}</p>
+    <div class="tags">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></a>`;
+}
+
+function mediaBlock(m, colour){
+  const col = colour || "orange";
+  if (m.type === "reading"){
+    const r = READINGS[m.id]; if (!r) return "";
+    return `<div class="block"><div class="head"><h3 class="title">${esc(r.kicker)}</h3><small>${esc(r.author)}</small></div><a class="readlink" href="#${esc(m.id)}"><span class="rl-kicker">${esc(r.kicker)} · ${esc(r.author)}</span><span class="rl-title">${esc(r.title)}</span><span class="rl-sum">${esc(r.summary)}</span><span class="rl-go">Read the review →</span></a></div>`;
+  }
+  if (m.type === "scores"){
+    return `<div class="block scores"><div class="head"><h3 class="title">${esc(m.label)}</h3><small>${esc(m.hint||"")}</small></div><div class="score-grid">${m.items.map(it=>`<a class="score" href="${esc(it.pdf)}" target="_blank" rel="noopener"><div class="score-img"><img src="${esc(it.img)}" alt="First page of ${esc(it.title)}" loading="lazy"></div><span class="score-title">${esc(it.title)}</span><span class="score-sub">${esc(it.sub)} · ${it.pages} pages</span><span class="score-go">Open score and parts →</span></a>`).join("")}</div></div>`;
+  }
+  if (m.type === "source"){
+    return `<div class="block"><div class="head"><h3 class="title">Full reflection</h3><small>My e-portfolio</small></div><a class="go pending bg-${col}" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="label"><span class="dot">${OUT}</span>Read the full reflection</span></a></div>`;
+  }
+  if (m.type === "soon"){
+    return `<div class="block"><div class="head"><h3 class="title">${esc(m.label)}</h3><small>${esc(m.hint||"")}</small></div><div class="go pending bg-${col}"><span class="label"><span class="badge paper">Coming soon</span>Interactive tool on its way</span></div></div>`;
+  }
+  if (m.type === "youtube"){
+    const watch = "https://www.youtube.com/watch?v=" + m.id;
+    const inner = EMBED_MODE === "embed"
+      ? `<iframe class="frame" src="https://www.youtube-nocookie.com/embed/${esc(m.id)}" title="${esc(m.label)}" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>`
+      : `<a class="go bg-${col}" href="${watch}" target="_blank" rel="noopener">${motif(m.id.length, col)}<span class="label"><span class="dot">${PLAY}</span>Watch on YouTube</span></a>`;
+    return `<div class="block"><div class="head"><h3 class="title">${esc(m.label)}</h3>${EMBED_MODE==="embed"?`<a class="small-link" href="${watch}" target="_blank" rel="noopener">Open on YouTube</a>`:`<small>Video</small>`}</div>${inner}</div>`;
+  }
+  if (m.local){
+    return `<div class="block tool"><div class="head"><h3 class="title">${esc(m.label)}</h3><small>${m.hint?esc(m.hint)+" · ":""}<a class="small-link" href="${esc(m.local)}" target="_blank" rel="noopener">Full screen</a></small></div><iframe class="frame toolframe" src="${esc(m.local)}" title="${esc(m.label)}" loading="lazy" onload="fitFrame(this)"></iframe></div>`;
+  }
+  const inner = EMBED_MODE === "embed"
+    ? `<iframe class="frame tall" src="${esc(m.embed||m.url)}" title="${esc(m.label)}" loading="lazy" allow="autoplay; microphone; fullscreen" allowfullscreen></iframe>`
+    : `<a class="go pending bg-${col}" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="label"><span class="dot">${OUT}</span>Open ${esc(m.label)}</span></a>`;
+  return `<div class="block"><div class="head"><h3 class="title">${esc(m.label)}</h3><small>${m.hint?esc(m.hint)+" · ":""}<a class="small-link" href="${esc(m.url)}" target="_blank" rel="noopener">New tab</a></small></div>${inner}</div>`;
+}
+
+function allVideos(){
+  const v = [];
+  POSTS.forEach(p => p.media.filter(m=>m.type==="youtube").forEach(m => v.push({m:{...m, label: (p.subject!==POSTS[0].subject?p.subject+" · ":"")+weekName(p)+": "+p.title}, c:p.colour})));
+  EXTRA_VIDEOS.forEach((m,i) => v.push({m:{type:"youtube", ...m}, c:COLOURS[i%4]}));
+  return v;
+}
+
+function subjects(){ return ["All", ...new Set(POSTS.map(p => p.subject))]; }
+function filterBar(){
+  const s = subjects(); if (s.length < 3) return "";
+  return `<div class="bar" role="group" aria-label="Subject">${s.map(x=>`<button class="tag" data-subject="${esc(x)}" aria-pressed="${x===subject}">${esc(x)}</button>`).join("")}</div>`;
+}
+function homeGrid(){
+  if (homeTab === "videos") return `<div class="grid flush blocks-grid">${allVideos().map(v=>mediaBlock(v.m,v.c).replace('class="block"','class="card block"')).join("")}</div>`;
+  const list = POSTS.filter(p => subject==="All" || p.subject===subject);
+  return `${filterBar()}<div class="grid${filterBar()?"":" flush"}">${list.map(card).join("")}</div>`;
+}
+
+function gallery(list, kind){
+  if (!list.length) return "";
+  return `<div class="gallery ${kind}">${list.map(g=>`<figure class="${g.wide?"wide":""}"><div class="photo bg-${g.colour||"orange"}"><img class="duo" src="${esc(g.src)}" alt="${esc(g.alt)}" loading="lazy"></div><figcaption>${esc(g.caption)}</figcaption></figure>`).join("")}</div>`;
+}
+
+function viewHome(){
+  const first = SITE.name;
+  return `<section class="mast"><div class="wrap">
+    <h1 class="display">${esc(first)}</h1>
+    <p class="intro"><b>${esc(SITE.tagline)}</b> — ${esc(ABOUT[0])} <a class="more" href="#about">More about me →</a></p>
+    <div class="tabs" role="tablist" aria-label="Show">
+      <button class="tab" role="tab" data-tab="posts" aria-selected="${homeTab==="posts"}">Posts</button>
+      <button class="tab" role="tab" data-tab="videos" aria-selected="${homeTab==="videos"}">Videos</button>
+    </div>
+    <div id="homegrid">${homeGrid()}</div>
+  </div></section>`;
+}
+
+function viewPost(p){
+  const same = POSTS.filter(x => x.subject === p.subject), i = same.indexOf(p), prev = same[i-1], next = same[i+1];
+  const body = p.body.length ? `<div class="prose">${p.body.map(t=>`<p>${esc(t)}</p>`).join("")}</div>`
+    : (p.status==="published" && p.media.length) ? "" : `<div class="soon"><span class="badge paper">Coming soon</span>The written review for ${esc(weekName(p))} is on its way.</div>`;
+  const rank = m => m.type==="scores" ? -1 : m.type==="youtube" ? 0 : m.type==="reading" ? 0.5 : m.type==="soon" ? 2 : m.type==="source" ? 3 : 1;
+  const ordered = [...p.media].sort((a,b)=>rank(a)-rank(b));
+  const media = p.media.length ? `<div class="blocks">${ordered.map((m,k)=>mediaBlock(m, k ? COLOURS[(COLOURS.indexOf(p.colour)+1)%4] : p.colour)).join("")}</div>` : "";
+  return `<article class="post"><div class="wrap">
+    <div class="band bg-${p.colour}">${p.image?`<img class="duo" src="${esc(p.image)}" alt="">`:`<svg class="band-art" viewBox="0 0 280 280" preserveAspectRatio="xMaxYMid meet" aria-hidden="true">${ART[p.id]||""}</svg>`}<span class="numeral">${markOf(p)}</span></div>
+    <div class="kicker"><span>${esc(weekName(p))}</span>${badgeFor(p)}</div>
+    <h1>${esc(p.title)}</h1>
+    <div class="crumbs" style="margin-top:var(--s6)">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}<span class="tag">${esc(p.subject)}</span></div>
+    ${body}${media}
+    ${(prev||next)?"":"<!--"}<nav class="pager" aria-label="More posts">
+      ${prev?`<a href="#${prev.id}"><small>← ${esc(weekName(prev))}</small><b>${esc(prev.title)}</b></a>`:`<span></span>`}
+      ${next?`<a class="next" href="#${next.id}"><small>${esc(weekName(next))} →</small><b>${esc(next.title)}</b></a>`:`<span></span>`}
+    </nav>${(prev||next)?"":"-->"}
+  </div></article>`;
+}
+
+function viewReading(r){
+  const from = POSTS.find(p => p.id === r.from);
+  const block = b => b.p ? `<p>${esc(b.p)}</p>` : b.ol ? `<ol class="rlist">${b.ol.map(t=>`<li>${esc(t)}</li>`).join("")}</ol>`
+    : b.eq ? `<div class="req" role="math" aria-label="${esc(b.eq)}">${esc(b.eq)}</div>`
+    : b.fig ? `<figure class="rfig">${b.fig.num?`<figcaption class="rfig-num">${esc(b.fig.num)}</figcaption>`:""}<figcaption class="rfig-title">${esc(b.fig.title)}</figcaption><img src="${esc(b.fig.src)}" alt="${esc(b.fig.title)}" loading="lazy"><figcaption><i>Note.</i> ${esc(b.fig.note)}</figcaption></figure>` : "";
+  const sec = r.sections.map(x => x.blocks ? `<h2>${esc(x.h)}</h2>${x.blocks.map(block).join("")}` : `<h2>${esc(x.h)}</h2>${x.p.map(t=>`<p>${esc(t)}</p>`).join("")}${x.table?`<figure class="rtable"><figcaption class="rfig-num">${esc(x.table.caption)}</figcaption><figcaption class="rfig-title">${esc(x.table.title||"")}</figcaption><table>${x.table.rows.map(([a,b])=>`<tr><th scope="row">${esc(a)}</th><td>${esc(b)}</td></tr>`).join("")}</table>${x.table.note?`<figcaption><i>Note.</i> ${esc(x.table.note)}</figcaption>`:""}</figure>`:""}${(x.after||[]).map(t=>`<p>${esc(t)}</p>`).join("")}`).join("");
+  return `<article class="post reading"><div class="wrap">
+    ${from?`<a class="back" href="#${from.id}">← ${esc(weekName(from))}: ${esc(from.title)}</a>`:""}
+    <div class="kicker"><span>${esc(r.kicker)}</span><span class="badge ${r.colour==="orange"?"orange":r.colour==="green"?"green":""}">${esc(r.author)}</span></div>
+    <h1>${esc(r.title)}</h1>
+    ${r.image?`<div class="band bg-${r.colour}"><img class="duo" src="${esc(r.image)}" alt="" style="object-position:50% 46%"></div>`:`<div class="band bg-${r.colour}"><svg class="band-art" viewBox="0 0 280 280" preserveAspectRatio="xMaxYMid meet" aria-hidden="true">${ART[r.from]||""}</svg></div>`}
+    ${r.preface?`<p class="rpreface">${esc(r.preface)}</p>`:""}
+    <div class="rbody">${sec}</div>
+    ${from?`<nav class="pager" aria-label="Back"><a href="#${from.id}"><small>← Back to ${esc(weekName(from))}</small><b>${esc(from.title)}</b></a><span></span></nav>`:""}
+  </div></article>`;
+}
+
+function viewVideos(){
+  const ch = SITE.channelUrl ? `<a class="channel" href="${esc(SITE.channelUrl)}" target="_blank" rel="noopener"><span></span>${esc(SITE.channelName)}</a>` : "";
+  return `<section class="page"><div class="wrap">
+    <h1>Videos</h1>
+    <div style="margin-top:var(--s6)">${ch}</div>
+    <div class="blocks">${allVideos().map(v=>mediaBlock(v.m,v.c)).join("")}</div>
+  </div></section>`;
+}
+
+function viewAbout(){
+  const pic = PHOTOS.about ? `<img class="duo" src="${esc(PHOTOS.about)}" alt="Hendrix George">` : `${motif(2)}<span class="numeral">HG</span>`;
+  return `<section class="page"><div class="wrap">
+    <h1>About me</h1>
+    <div class="about">
+      <div><div class="media bg-orange">${pic}</div></div>
+      <div>${ABOUT.map(t=>`<p>${esc(t)}</p>`).join("")}
+        <div class="facts">${ABOUT_TAGS.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div></div>
+    </div>
+    ${gallery(GALLERY, "")}
+  </div></section>`;
+}
+
+function viewBib(){
+  return `<section class="page"><div class="wrap">
+    <h1>Bibliography</h1>
+    <p class="refnote">References in APA 7th edition style.</p>
+    <ol class="refs">${[...BIBLIOGRAPHY].sort((a,b)=>a.replace(/<[^>]+>/g,"").localeCompare(b.replace(/<[^>]+>/g,""),"en",{sensitivity:"base"})).map(r=>`<li>${r.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')}</li>`).join("")}</ol>
+  </div></section>`;
+}
+
+function render(){
+  const id = (location.hash || "#home").slice(1) || "home";
+  const post = POSTS.find(p => p.id === id);
+  const reading = READINGS[id];
+  const page = (post || reading) ? "home" : (PAGES.some(p => p[0] === id) ? id : "home");
+  $("#app").innerHTML = reading ? viewReading(reading) : post ? viewPost(post)
+    : page==="videos" ? viewVideos() : page==="about" ? viewAbout() : page==="bibliography" ? viewBib() : viewHome();
+  $("#nav").innerHTML = PAGES.map(([k,l]) => `<a href="#${k}" ${k===page&&!post?'aria-current="page"':""}>${l}</a>`).join("");
+  $("#foot").innerHTML =
+    `<div><span class="lbl">Pages</span>${PAGES.map(([k,l])=>`<a href="#${k}">${l}</a>`).join("<br>")}</div>` +
+    `<div><span class="lbl">Subject</span>${subjects().slice(1).map(esc).join("<br>")}</div>` +
+    (SITE.channelUrl?`<div><span class="lbl">YouTube</span><a href="${esc(SITE.channelUrl)}" target="_blank" rel="noopener">${esc(SITE.channelName)}</a></div>`:"") +
+    (SITE.email?`<div><span class="lbl">Mail</span><a href="mailto:${esc(SITE.email)}">${esc(SITE.email)}</a></div>`:"") +
+    `<div><span class="lbl">${esc(SITE.tagline)}</span>${esc(SITE.name)}</div>`;
+  document.title = post ? `${post.title} · ${SITE.name}` : SITE.name;
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest(".tab");
+  if (t){ homeTab = t.dataset.tab; document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b===t)); $("#homegrid").innerHTML = homeGrid(); return; }
+  const c = e.target.closest("button.tag[data-subject]");
+  if (c){ subject = c.dataset.subject; $("#homegrid").innerHTML = homeGrid(); }
+});
+window.addEventListener("hashchange", render);
+render();
+</script>
+
+</body>
+</html>
