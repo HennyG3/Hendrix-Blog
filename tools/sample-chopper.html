@@ -66,6 +66,8 @@
   .btn:hover{color:var(--text);border-color:var(--text-dim);}
   .btn:focus-visible,.pad:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
   .btn.on{background:var(--accent);border-color:var(--accent);color:#0b0c0f;}
+  select.btn{max-width:100%;color:var(--text);}
+  select.btn option{background:var(--bg-panel);color:var(--text);}
 
   /* ---------- Deck (whole-song waveform) ---------- */
   .deck{margin-bottom:14px;}
@@ -135,6 +137,7 @@
     <div class="deck-top">
       <div class="panel-label"><span class="dot"></span><span id="trackName">Loading sample…</span></div>
       <div class="deck-actions">
+        <select class="btn" id="song" aria-label="Song to sample"></select>
         <button class="btn" id="chopAuto" title="Put one slice on the strongest hit in each ninth of the song">Auto-chop</button>
         <button class="btn" id="chopEven" title="Space the slices evenly across the song">Even</button>
         <button class="btn" id="chopShuffle" title="Pick nine random hits">Shuffle</button>
@@ -186,7 +189,10 @@
 
 <script>
 (function(){
-  const DEFAULT = { url:"../audio/do-hot-girls-like-chords.mp3", name:"Do Hot Girls Like Chords" };
+  const SONGS = [
+    { url:"../audio/do-hot-girls-like-chords.mp3", name:"Do Hot Girls Like Chords" },
+    { url:"../audio/inner-city-good-life.mp3", name:"Inner City – Good Life" }
+  ];
   const N = 9;
   const COLOURS = ["#74edfc","#4de89a","#ff3c00"];
   const col = i => COLOURS[i % 3];
@@ -246,16 +252,20 @@
   }
 
   /* ---------- Loading ---------- */
-  async function loadArrayBuffer(ab, name){
+  async function loadArrayBuffer(ab, name, id){
     $("waveMsg").textContent = "Decoding…"; $("waveMsg").hidden = false;
+    let decoded;
     try {
       const c = ctx || new (window.AudioContext || window.webkitAudioContext)();
       if (!ctx){ ctx = c; out = ctx.createGain(); out.gain.value = master.vol; out.connect(ctx.destination); }
-      buffer = await c.decodeAudioData(ab);
+      decoded = await c.decodeAudioData(ab);
     } catch(e){
-      $("waveMsg").textContent = "Couldn't read that file. Try an MP3, WAV or M4A."; return;
+      if (id === loadId) $("waveMsg").textContent = "Couldn't read that file. Try an MP3, WAV or M4A.";
+      return;
     }
+    if (id !== loadId) return;
     voices.forEach((_, k) => release(k));
+    buffer = decoded;
     const L = buffer.getChannelData(0);
     if (buffer.numberOfChannels > 1){
       const R = buffer.getChannelData(1); data = new Float32Array(L.length);
@@ -268,12 +278,19 @@
     chopAuto();
   }
 
-  async function loadDefault(){
+  let loadId = 0;   // ignores a slow load that finishes after the visitor has already picked another song
+
+  async function loadSong(i){
+    const song = SONGS[i], id = ++loadId;
+    $("trackName").textContent = "Loading " + song.name + "…";
+    $("waveMsg").textContent = "Loading…"; $("waveMsg").hidden = false;
     try {
-      const r = await fetch(DEFAULT.url);
+      const r = await fetch(song.url);
       if (!r.ok) throw 0;
-      await loadArrayBuffer(await r.arrayBuffer(), DEFAULT.name);
+      const ab = await r.arrayBuffer();
+      if (id === loadId) await loadArrayBuffer(ab, song.name, id);
     } catch(e){
+      if (id !== loadId) return;
       $("trackName").textContent = "No sample loaded";
       $("waveMsg").textContent = "Load or drop an audio file to start chopping.";
     }
@@ -281,9 +298,15 @@
 
   function loadFile(f){
     if (!f) return;
-    const name = f.name.replace(/\.[^.]+$/, "");
-    f.arrayBuffer().then(ab => loadArrayBuffer(ab, name));
+    const name = f.name.replace(/\.[^.]+$/, ""), id = ++loadId;
+    let own = $("song").querySelector("option[value=own]");
+    if (!own){ own = new Option("", "own"); $("song").add(own); }
+    own.textContent = "Your file: " + name; $("song").value = "own";
+    f.arrayBuffer().then(ab => { if (id === loadId) loadArrayBuffer(ab, name, id); });
   }
+
+  SONGS.forEach((s, i) => $("song").add(new Option(s.name, i)));
+  $("song").addEventListener("change", e => { if (e.target.value !== "own") loadSong(+e.target.value); });
 
   /* ---------- Chopping ---------- */
   function detectOnsets(){
@@ -553,7 +576,7 @@
   window.addEventListener("pointerup", endDrag); window.addEventListener("pointercancel", endDrag);
 
   refresh();
-  loadDefault();
+  loadSong(0);
 })();
 </script>
 </body>
