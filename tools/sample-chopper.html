@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sample Chopper — A Nine-Pad Slicer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161a;
+    --bg-panel:#1b1e25;
+    --bg-panel-2:#20232b;
+    --bg-well:#111318;
+    --border:#2b2f3a;
+    --border-soft:#23262f;
+    --text:#ecedf2;
+    --text-muted:#9096a3;
+    --text-dim:#5c606b;
+    --accent:#74edfc;
+    --green:#4de89a;
+    --orange:#ff3c00;
+    --radius:16px;
+    --radius-sm:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 500px at 20% -10%, rgba(255,255,255,0.035), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:28px 16px 40px;
+  }
+  ::selection{background:var(--accent);color:#0b0c0f;}
+  .wrap{max-width:980px;margin:0 auto;}
+  button,input{font:inherit;color:inherit;}
+
+  /* ---------- Header ---------- */
+  .brand{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;}
+  .brand-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;letter-spacing:0.01em;}
+  .brand-title span{color:var(--accent);}
+  .brand-sub,.mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text-dim);}
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+    border:1px solid var(--border);border-radius:var(--radius);position:relative;
+    box-shadow:0 1px 0 rgba(255,255,255,0.02) inset, 0 12px 24px -16px rgba(0,0,0,0.6);
+    padding:18px;
+  }
+  .panel-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
+  .panel-label .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+  .panel-label b{color:var(--text);font-weight:600;}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+    background:var(--bg-well);border:1px solid var(--border);border-radius:999px;
+    padding:6px 12px;font-size:12px;font-weight:500;color:var(--text-muted);
+    transition:color .15s, border-color .15s, background .15s;
+  }
+  .btn:hover{color:var(--text);border-color:var(--text-dim);}
+  .btn:focus-visible,.pad:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .btn.on{background:var(--accent);border-color:var(--accent);color:#0b0c0f;}
+
+  /* ---------- Deck (whole-song waveform) ---------- */
+  .deck{margin-bottom:14px;}
+  .deck-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+  .deck-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .wave{position:relative;height:140px;background:var(--bg-well);border:1px solid var(--border-soft);border-radius:var(--radius-sm);overflow:hidden;touch-action:none;}
+  .wave canvas{display:block;width:100%;height:100%;cursor:crosshair;}
+  .wave .msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;color:var(--text-muted);font-size:13px;pointer-events:none;}
+  .wave .msg[hidden]{display:none;}
+  body.dragging .wave{border-color:var(--accent);}
+  .help{margin:10px 0 0;font-size:12px;color:var(--text-dim);line-height:1.5;}
+  .help kbd{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:0 4px;}
+
+  /* ---------- Pads + editor ---------- */
+  .main{display:grid;grid-template-columns:1fr;gap:14px;}
+  @media (min-width:760px){.main{grid-template-columns:1.05fr 1fr;}}
+
+  .pads-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
+  .pad{
+    --c:var(--accent);
+    position:relative;aspect-ratio:1;border-radius:12px;cursor:pointer;text-align:left;
+    background:linear-gradient(180deg,#262a33,#1d2027);border:1px solid var(--border);
+    box-shadow:0 2px 0 #0c0d10, 0 1px 0 rgba(255,255,255,0.04) inset;
+    padding:10px;display:flex;flex-direction:column;justify-content:space-between;
+    touch-action:manipulation;user-select:none;-webkit-user-select:none;
+    transition:transform .05s, box-shadow .12s, background .12s;
+  }
+  .pad .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(20px,4vw,30px);line-height:1;color:var(--c);}
+  .pad .meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-dim);line-height:1.4;}
+  .pad .meta .p{color:var(--text-muted);}
+  .pad.sel{border-color:var(--c);}
+  .pad.on{
+    transform:translateY(2px);
+    background:linear-gradient(180deg,color-mix(in srgb,var(--c) 38%,#262a33),color-mix(in srgb,var(--c) 22%,#1d2027));
+    box-shadow:0 0 0 #0c0d10, 0 0 22px -4px var(--c);
+  }
+  .pad.on .num{color:#fff;}
+
+  .zoom{height:110px;margin-top:12px;background:var(--bg-well);border:1px solid var(--border-soft);border-radius:var(--radius-sm);overflow:hidden;touch-action:none;}
+  .zoom canvas{display:block;width:100%;height:100%;cursor:ew-resize;}
+
+  .ctl{display:grid;grid-template-columns:92px 1fr 64px;align-items:center;gap:10px;margin-top:12px;}
+  .ctl label{font-size:12px;color:var(--text-muted);}
+  .ctl output,.ctl .val{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;color:var(--text);}
+  .row-btns{display:flex;gap:6px;flex-wrap:wrap;grid-column:2/4;}
+  hr{border:0;border-top:1px solid var(--border-soft);margin:18px 0 6px;}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:4px;background:var(--border);outline:none;cursor:pointer;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text);border:3px solid var(--bg-panel);box-shadow:0 0 0 1px var(--border);}
+  input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--text);border:3px solid var(--bg-panel);}
+
+  .keys-hint{
+    margin-top:12px;padding:8px 12px;border-radius:999px;font-size:12px;text-align:center;
+    border:1px dashed var(--border);color:var(--text-muted);
+  }
+  body.focused .keys-hint{border-style:solid;border-color:color-mix(in srgb,var(--green) 50%,var(--border));color:var(--green);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="brand">
+    <div class="brand-title">Sample <span>Chopper</span></div>
+    <div class="brand-sub">Nine-pad slicer · keys 1–9</div>
+  </header>
+
+  <section class="panel deck">
+    <div class="deck-top">
+      <div class="panel-label"><span class="dot"></span><span id="trackName">Loading sample…</span></div>
+      <div class="deck-actions">
+        <button class="btn" id="chopAuto" title="Put one slice on the strongest hit in each ninth of the song">Auto-chop</button>
+        <button class="btn" id="chopEven" title="Space the slices evenly across the song">Even</button>
+        <button class="btn" id="chopShuffle" title="Pick nine random hits">Shuffle</button>
+        <label class="btn">Load your own<input type="file" id="file" accept="audio/*" hidden></label>
+      </div>
+    </div>
+    <div class="wave" id="waveBox"><canvas id="wave"></canvas><div class="msg" id="waveMsg">Loading…</div></div>
+    <p class="help">Click the waveform to move the selected pad's slice there, or drag a numbered marker. You can also drop an audio file anywhere on this page.</p>
+  </section>
+
+  <div class="main">
+    <section class="panel">
+      <div class="panel-label"><span class="dot"></span>Pads</div>
+      <div class="pads-grid" id="pads"></div>
+      <div class="keys-hint" id="keysHint">Click anywhere in the sampler, then play with keys 1–9</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-label">Editing pad <b id="edNum">1</b></div>
+      <div class="zoom"><canvas id="zoom"></canvas></div>
+
+      <div class="ctl">
+        <label>Start</label>
+        <div class="row-btns">
+          <button class="btn" data-nudge="-0.01">−10 ms</button>
+          <button class="btn" data-nudge="0.01">+10 ms</button>
+          <button class="btn" id="snap" title="Move the start to the nearest hit">Snap to hit</button>
+        </div>
+      </div>
+      <div class="ctl"><label for="len">Length</label><input type="range" id="len" min="0.05" max="4" step="0.01"><output id="vLen"></output></div>
+      <div class="ctl"><label for="pitch">Pad pitch</label><input type="range" id="pitch" min="-24" max="24" step="1"><output id="vPitch"></output></div>
+
+      <hr>
+      <div class="panel-label">Master</div>
+      <div class="ctl"><label for="mPitch">Pitch</label><input type="range" id="mPitch" min="-12" max="12" step="1" value="0"><output id="vMPitch"></output></div>
+      <div class="ctl"><label for="vol">Volume</label><input type="range" id="vol" min="0" max="1" step="0.01" value="0.85"><output id="vVol"></output></div>
+      <div class="ctl">
+        <label>Play mode</label>
+        <div class="row-btns">
+          <button class="btn on" data-mode="oneshot" title="Each hit plays its full length">One-shot</button>
+          <button class="btn" data-mode="hold" title="Plays only while the key is held">Hold</button>
+          <button class="btn on" id="choke" title="A new hit cuts off the last one, like an MPC mute group">Choke</button>
+        </div>
+      </div>
+      <p class="help">Double-click a slider to reset it. <kbd>-</kbd> and <kbd>=</kbd> move the master pitch down and up a semitone.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  const DEFAULT = { url:"../audio/do-hot-girls-like-chords.mp3", name:"Do Hot Girls Like Chords" };
+  const N = 9;
+  const COLOURS = ["#74edfc","#4de89a","#ff3c00"];
+  const col = i => COLOURS[i % 3];
+
+  const pads = Array.from({length:N}, () => ({ start:0, len:0.8, pitch:0 }));
+  const master = { pitch:0, vol:0.85, mode:"oneshot", choke:true };
+  let sel = 0, buffer = null, data = null, onsets = [], ctx = null, out = null, dirty = true;
+  const voices = new Map();   // pad index -> { src, gain, t0, rate, start }
+
+  const $ = id => document.getElementById(id);
+  const fmt = t => { const m = Math.floor(t/60), s = t - m*60; return m + ":" + (s < 10 ? "0" : "") + s.toFixed(2); };
+  const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+
+  /* ---------- Audio ---------- */
+  function audio(){
+    if (!ctx){
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      out = ctx.createGain(); out.gain.value = master.vol; out.connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  function trigger(i){
+    if (!buffer) return;
+    const c = audio(), p = pads[i], now = c.currentTime;
+    if (master.choke) [...voices.keys()].forEach(k => release(k, 0.012)); else release(i, 0.012);
+
+    const rate = Math.pow(2, (p.pitch + master.pitch) / 12);
+    const src = c.createBufferSource(), gain = c.createGain();
+    src.buffer = buffer; src.playbackRate.value = rate;
+    src.connect(gain); gain.connect(out);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(1, now + 0.003);
+    src.start(now, p.start);
+    if (master.mode === "oneshot"){
+      const dur = p.len / rate;
+      gain.gain.setValueAtTime(1, now + Math.max(0.004, dur - 0.012));
+      gain.gain.linearRampToValueAtTime(0, now + dur);
+      src.stop(now + dur + 0.01);
+    }
+    const v = { src, gain, t0:now, rate, start:p.start };
+    voices.set(i, v);
+    src.onended = () => { if (voices.get(i) === v){ voices.delete(i); padEls[i].classList.remove("on"); dirty = true; } };
+    padEls[i].classList.add("on");
+    if (sel !== i) select(i);
+  }
+
+  function release(i, fade){
+    const v = voices.get(i); if (!v) return;
+    const now = ctx.currentTime;
+    v.gain.gain.cancelScheduledValues(now);
+    v.gain.gain.setValueAtTime(v.gain.gain.value, now);
+    v.gain.gain.linearRampToValueAtTime(0, now + (fade || 0.03));
+    try { v.src.stop(now + (fade || 0.03) + 0.01); } catch(e) {}
+    voices.delete(i); padEls[i].classList.remove("on"); dirty = true;
+  }
+
+  /* ---------- Loading ---------- */
+  async function loadArrayBuffer(ab, name){
+    $("waveMsg").textContent = "Decoding…"; $("waveMsg").hidden = false;
+    try {
+      const c = ctx || new (window.AudioContext || window.webkitAudioContext)();
+      if (!ctx){ ctx = c; out = ctx.createGain(); out.gain.value = master.vol; out.connect(ctx.destination); }
+      buffer = await c.decodeAudioData(ab);
+    } catch(e){
+      $("waveMsg").textContent = "Couldn't read that file. Try an MP3, WAV or M4A."; return;
+    }
+    voices.forEach((_, k) => release(k));
+    const L = buffer.getChannelData(0);
+    if (buffer.numberOfChannels > 1){
+      const R = buffer.getChannelData(1); data = new Float32Array(L.length);
+      for (let i = 0; i < L.length; i++) data[i] = (L[i] + R[i]) * 0.5;
+    } else data = L;
+    overviewCache = null;
+    onsets = detectOnsets();
+    $("trackName").textContent = name + " · " + fmt(buffer.duration);
+    $("waveMsg").hidden = true;
+    chopAuto();
+  }
+
+  async function loadDefault(){
+    try {
+      const r = await fetch(DEFAULT.url);
+      if (!r.ok) throw 0;
+      await loadArrayBuffer(await r.arrayBuffer(), DEFAULT.name);
+    } catch(e){
+      $("trackName").textContent = "No sample loaded";
+      $("waveMsg").textContent = "Load or drop an audio file to start chopping.";
+    }
+  }
+
+  function loadFile(f){
+    if (!f) return;
+    const name = f.name.replace(/\.[^.]+$/, "");
+    f.arrayBuffer().then(ab => loadArrayBuffer(ab, name));
+  }
+
+  /* ---------- Chopping ---------- */
+  function detectOnsets(){
+    const hop = 512, sr = buffer.sampleRate, n = Math.floor(data.length / hop);
+    const env = new Float32Array(n);
+    for (let f = 0; f < n; f++){
+      let s = 0; for (let k = f*hop, e = k + hop; k < e; k++) s += data[k] * data[k];
+      env[f] = Math.sqrt(s / hop);
+    }
+    const nov = new Float32Array(n);
+    for (let f = 1; f < n; f++) nov[f] = Math.max(0, env[f] - env[f-1]);
+    const found = [];
+    for (let f = 4; f < n - 4; f++){
+      const v = nov[f]; if (v <= 0) continue;
+      let peak = true;
+      for (let j = -4; j <= 4 && peak; j++) if (j && nov[f+j] > v) peak = false;
+      if (peak) found.push({ t: Math.max(0, (f - 1) * hop / sr - 0.005), s: v });
+    }
+    return found;
+  }
+
+  function setStarts(starts){
+    starts.sort((a,b) => a - b).forEach((t, i) => { pads[i].start = clamp(t, 0, buffer.duration - 0.05); });
+    refresh();
+  }
+
+  function chopAuto(){
+    if (!buffer) return;
+    const sec = buffer.duration / N;
+    setStarts(pads.map((_, i) => {
+      const lo = i * sec, hi = (i + 1) * sec;
+      let best = null;
+      for (const o of onsets) if (o.t >= lo && o.t < hi && (!best || o.s > best.s)) best = o;
+      return best ? best.t : lo;
+    }));
+  }
+
+  function chopEven(){
+    if (!buffer) return;
+    setStarts(pads.map((_, i) => i * buffer.duration / N));
+  }
+
+  function chopShuffle(){
+    if (!buffer) return;
+    const strong = [...onsets].sort((a,b) => b.s - a.s).slice(0, 80);
+    const picks = [];
+    while (picks.length < N && strong.length){
+      const o = strong.splice(Math.floor(Math.random() * strong.length), 1)[0];
+      if (picks.every(t => Math.abs(t - o.t) > 0.3)) picks.push(o.t);
+    }
+    while (picks.length < N) picks.push(Math.random() * buffer.duration);
+    setStarts(picks);
+  }
+
+  function snap(){
+    if (!buffer || !onsets.length) return;
+    const p = pads[sel];
+    let best = null;
+    for (const o of onsets){ const d = Math.abs(o.t - p.start); if (d < 0.25 && (!best || d < best.d)) best = { d, t:o.t }; }
+    if (best){ p.start = best.t; refresh(); }
+  }
+
+  /* ---------- Pads UI ---------- */
+  const padEls = [];
+  const padBox = $("pads");
+  for (let i = 0; i < N; i++){
+    const b = document.createElement("button");
+    b.className = "pad"; b.type = "button"; b.style.setProperty("--c", col(i));
+    b.innerHTML = `<span class="num">${i+1}</span><span class="meta"><span class="t"></span><br><span class="p"></span></span>`;
+    b.addEventListener("pointerdown", e => { e.preventDefault(); b.focus({preventScroll:true}); trigger(i); });
+    const up = () => { if (master.mode === "hold") release(i); };
+    b.addEventListener("pointerup", up); b.addEventListener("pointerleave", up); b.addEventListener("pointercancel", up);
+    padBox.appendChild(b); padEls.push(b);
+  }
+
+  function select(i){ sel = i; refresh(); }
+
+  function refresh(){
+    padEls.forEach((b, i) => {
+      const p = pads[i];
+      b.classList.toggle("sel", i === sel);
+      b.querySelector(".t").textContent = buffer ? fmt(p.start) : "—";
+      b.querySelector(".p").textContent = p.pitch ? (p.pitch > 0 ? "+" : "") + p.pitch + " st" : "";
+      b.setAttribute("aria-label", `Pad ${i+1}, key ${i+1}`);
+    });
+    const p = pads[sel];
+    $("edNum").textContent = sel + 1;
+    $("edNum").style.color = col(sel);
+    $("len").value = p.len; $("vLen").textContent = p.len.toFixed(2) + " s";
+    $("pitch").value = p.pitch; $("vPitch").textContent = (p.pitch > 0 ? "+" : "") + p.pitch + " st";
+    $("mPitch").value = master.pitch; $("vMPitch").textContent = (master.pitch > 0 ? "+" : "") + master.pitch + " st";
+    $("vVol").textContent = Math.round(master.vol * 100) + "%";
+    zoomWin = null; dirty = true;
+  }
+
+  /* ---------- Controls ---------- */
+  $("len").addEventListener("input", e => { pads[sel].len = +e.target.value; refresh(); });
+  $("pitch").addEventListener("input", e => { pads[sel].pitch = +e.target.value; refresh(); });
+  $("mPitch").addEventListener("input", e => { master.pitch = +e.target.value; refresh(); });
+  $("vol").addEventListener("input", e => { master.vol = +e.target.value; if (out) out.gain.value = master.vol; refresh(); });
+  const resets = { len:() => pads[sel].len = 0.8, pitch:() => pads[sel].pitch = 0, mPitch:() => master.pitch = 0, vol:() => { master.vol = 0.85; $("vol").value = 0.85; if (out) out.gain.value = 0.85; } };
+  Object.keys(resets).forEach(id => $(id).addEventListener("dblclick", () => { resets[id](); refresh(); }));
+
+  document.querySelectorAll("[data-nudge]").forEach(b => b.addEventListener("click", () => {
+    if (!buffer) return;
+    const p = pads[sel]; p.start = clamp(p.start + +b.dataset.nudge, 0, buffer.duration - 0.05); refresh();
+  }));
+  $("snap").addEventListener("click", snap);
+  document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => {
+    master.mode = b.dataset.mode;
+    document.querySelectorAll("[data-mode]").forEach(x => x.classList.toggle("on", x === b));
+  }));
+  $("choke").addEventListener("click", e => { master.choke = !master.choke; e.currentTarget.classList.toggle("on", master.choke); });
+  $("chopAuto").addEventListener("click", chopAuto);
+  $("chopEven").addEventListener("click", chopEven);
+  $("chopShuffle").addEventListener("click", chopShuffle);
+  $("file").addEventListener("change", e => loadFile(e.target.files[0]));
+
+  /* ---------- Keyboard ---------- */
+  function padFromKey(e){
+    const m = /^(?:Digit|Numpad)([1-9])$/.exec(e.code || "");
+    if (m) return +m[1] - 1;
+    return /^[1-9]$/.test(e.key) ? +e.key - 1 : -1;
+  }
+  document.addEventListener("keydown", e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const i = padFromKey(e);
+    if (i >= 0){ e.preventDefault(); if (!e.repeat) trigger(i); return; }
+    if (e.key === "-" || e.key === "="){
+      e.preventDefault();
+      master.pitch = clamp(master.pitch + (e.key === "=" ? 1 : -1), -12, 12); refresh();
+    }
+  });
+  document.addEventListener("keyup", e => {
+    const i = padFromKey(e);
+    if (i >= 0 && master.mode === "hold") release(i);
+  });
+
+  const setFocus = () => document.body.classList.toggle("focused", document.hasFocus());
+  window.addEventListener("focus", setFocus); window.addEventListener("blur", setFocus);
+  document.addEventListener("pointerdown", () => { window.focus(); setTimeout(setFocus); });
+  setFocus();
+  const hint = () => { $("keysHint").textContent = document.body.classList.contains("focused") ? "Keys 1–9 are live" : "Click anywhere in the sampler, then play with keys 1–9"; };
+  new MutationObserver(hint).observe(document.body, { attributes:true, attributeFilter:["class"] }); hint();
+
+  /* ---------- Drag and drop ---------- */
+  ["dragenter","dragover"].forEach(t => document.addEventListener(t, e => { e.preventDefault(); document.body.classList.add("dragging"); }));
+  ["dragleave","drop"].forEach(t => document.addEventListener(t, e => { e.preventDefault(); document.body.classList.remove("dragging"); }));
+  document.addEventListener("drop", e => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) loadFile(f); });
+
+  /* ---------- Drawing ---------- */
+  const waveC = $("wave"), zoomC = $("zoom");
+  const TAB = 18;   // css px reserved at the top of the overview for marker tabs
+  let overviewCache = null, zoomWin = null;
+
+  function size(c){
+    const dpr = window.devicePixelRatio || 1, r = c.getBoundingClientRect();
+    const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+    if (c.width !== w || c.height !== h){ c.width = w; c.height = h; if (c === waveC) overviewCache = null; }
+    return dpr;
+  }
+
+  function peaks(from, to, cols){
+    const out = new Float32Array(cols * 2), span = (to - from) / cols;
+    for (let x = 0; x < cols; x++){
+      const a = Math.max(0, Math.floor(from + x * span)), b = Math.min(data.length, Math.floor(from + (x + 1) * span));
+      let lo = 0, hi = 0;
+      for (let k = a; k < b; k++){ const v = data[k]; if (v < lo) lo = v; else if (v > hi) hi = v; }
+      out[2*x] = lo; out[2*x+1] = hi;
+    }
+    return out;
+  }
+
+  function drawWave(){
+    const dpr = size(waveC), g = waveC.getContext("2d"), W = waveC.width, H = waveC.height;
+    g.clearRect(0, 0, W, H);
+    if (!buffer) return;
+    const dur = buffer.duration, X = t => t / dur * W, top = TAB * dpr, mid = (top + H) / 2, amp = (H - top) / 2 * 0.92;
+    pads.forEach((p, i) => {
+      g.fillStyle = col(i) + (i === sel ? "40" : "1c");
+      g.fillRect(X(p.start), top, Math.max(2 * dpr, X(p.len)), H - top);
+    });
+    if (!overviewCache) overviewCache = peaks(0, data.length, W);
+    g.fillStyle = "#6a707c";
+    for (let x = 0; x < W; x++){
+      const lo = overviewCache[2*x], hi = overviewCache[2*x+1];
+      g.fillRect(x, mid - hi * amp, 1, Math.max(1, (hi - lo) * amp));
+    }
+    g.font = `600 ${11 * dpr}px "JetBrains Mono", monospace`; g.textAlign = "center"; g.textBaseline = "middle";
+    pads.forEach((p, i) => {
+      const x = Math.round(X(p.start));
+      g.fillStyle = col(i);
+      g.fillRect(x, top, Math.max(1, dpr), H - top);
+      g.fillRect(x, 0, 16 * dpr, top - 2 * dpr);
+      g.fillStyle = "#0b0c0f"; g.fillText(String(i + 1), x + 8 * dpr, top / 2);
+    });
+    g.fillStyle = "#fff";
+    voices.forEach(v => g.fillRect(X(v.start + (ctx.currentTime - v.t0) * v.rate), top, 2 * dpr, H - top));
+  }
+
+  function drawZoom(){
+    const dpr = size(zoomC), g = zoomC.getContext("2d"), W = zoomC.width, H = zoomC.height;
+    g.clearRect(0, 0, W, H);
+    if (!buffer) return;
+    const p = pads[sel], sr = buffer.sampleRate;
+    if (!zoomWin){ const a = Math.max(0, p.start - 0.25); zoomWin = [a, Math.min(buffer.duration, p.start + Math.max(p.len, 0.6) + 0.25)]; }
+    const [w0, w1] = zoomWin, X = t => (t - w0) / (w1 - w0) * W, mid = H / 2, amp = H / 2 * 0.9;
+    g.fillStyle = col(sel) + "30";
+    g.fillRect(X(p.start), 0, X(p.start + p.len) - X(p.start), H);
+    const pk = peaks(w0 * sr, w1 * sr, W);
+    for (let x = 0; x < W; x++){
+      const t = w0 + x / W * (w1 - w0);
+      g.fillStyle = t >= p.start && t <= p.start + p.len ? "#c9ced8" : "#4a4f5a";
+      const lo = pk[2*x], hi = pk[2*x+1];
+      g.fillRect(x, mid - hi * amp, 1, Math.max(1, (hi - lo) * amp));
+    }
+    g.fillStyle = col(sel);
+    g.fillRect(Math.round(X(p.start)), 0, 2 * dpr, H);
+    const v = voices.get(sel);
+    if (v){ g.fillStyle = "#fff"; g.fillRect(X(v.start + (ctx.currentTime - v.t0) * v.rate), 0, 2 * dpr, H); }
+  }
+
+  (function loop(){
+    if (dirty || voices.size){ drawWave(); drawZoom(); dirty = false; }
+    requestAnimationFrame(loop);
+  })();
+  new ResizeObserver(() => { dirty = true; }).observe(document.body);
+
+  /* ---------- Waveform interaction ---------- */
+  let drag = null;
+  waveC.addEventListener("pointerdown", e => {
+    if (!buffer) return;
+    const r = waveC.getBoundingClientRect(), x = e.clientX - r.left, dur = buffer.duration;
+    const toX = t => t / dur * r.width;
+    let hit = -1, bestD = Infinity;
+    pads.forEach((p, i) => {
+      const px = toX(p.start), inTab = e.clientY - r.top < TAB, d = inTab ? x - px - 8 : x - px;
+      const reach = inTab ? 10 : 5;
+      if (Math.abs(d) <= reach && (Math.abs(d) < bestD || i === sel)){ hit = i; bestD = Math.abs(d); }
+    });
+    if (hit < 0) hit = sel;
+    select(hit);
+    pads[hit].start = clamp(x / r.width * dur, 0, dur - 0.05);
+    drag = { el:waveC, pad:hit };
+    waveC.setPointerCapture(e.pointerId); refresh();
+  });
+  waveC.addEventListener("pointermove", e => {
+    if (!drag || drag.el !== waveC) return;
+    const r = waveC.getBoundingClientRect();
+    pads[drag.pad].start = clamp((e.clientX - r.left) / r.width * buffer.duration, 0, buffer.duration - 0.05); refresh();
+  });
+
+  zoomC.addEventListener("pointerdown", e => {
+    if (!buffer) return;
+    const r = zoomC.getBoundingClientRect(), win = zoomWin;
+    const at = cx => win[0] + (cx - r.left) / r.width * (win[1] - win[0]);
+    drag = { el:zoomC, at, win };
+    pads[sel].start = clamp(at(e.clientX), 0, buffer.duration - 0.05);
+    zoomC.setPointerCapture(e.pointerId); refresh(); zoomWin = win;
+  });
+  zoomC.addEventListener("pointermove", e => {
+    if (!drag || drag.el !== zoomC) return;
+    pads[sel].start = clamp(drag.at(e.clientX), 0, buffer.duration - 0.05); refresh(); zoomWin = drag.win;
+  });
+
+  const endDrag = () => { if (drag){ drag = null; zoomWin = null; dirty = true; } };
+  window.addEventListener("pointerup", endDrag); window.addEventListener("pointercancel", endDrag);
+
+  refresh();
+  loadDefault();
+})();
+</script>
+</body>
+</html>
